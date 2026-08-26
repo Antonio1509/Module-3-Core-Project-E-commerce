@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LocalCart — Discover local South African makers</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+ <header>
+    <div class="logo">
+      <span class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+          <path d="M3 6h18"></path>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+      </span>
+      LocalCart
+    </div>
+ 
+        <nav>
+      <a href="#" class="active">Dashboard</a>
+      <a href="#">Vendors</a>
+      <a href="#">About</a>
+      <a href="#">Subscribe</a>
+    </nav>
+ 
+    <div class="header-right">
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle light and dark mode">
+        <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+        </svg>
+      </button>
+ 
+      <label class="search-box">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Search…" aria-label="Search products" />
+      </label>
+      
+ <button class="icon-btn" aria-label="Cart" onclick="window.location.href='cart.html'">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <circle cx="9" cy="21" r="1"></circle>
+    <circle cx="20" cy="21" r="1"></circle>
+    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+  </svg>
+</button>
+ 
+      <div class="avatar">TM</div>
+    </div>
+  </header>
+ 
+  <section class="hero">
+    <h1>Welcome back, Thandiwe</h1>
+    <p>Discover new products from your favorite local South African artisans and small businesses.</p>
+    <button class="btn-primary">Browse products</button>
+  </section>
+  <section class="content">
+    <h2 class="section-title">Featured products</h2>
+    <div class="products">
+      <div class="product-card">
+        <div class="product-photo photo-cookies">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"></circle>
+            <circle cx="9" cy="10" r="1" fill="currentColor"></circle>
+            <circle cx="14" cy="9" r="1" fill="currentColor"></circle>
+            <circle cx="15" cy="14" r="1" fill="currentColor"></circle>
+            <circle cx="10" cy="15" r="1" fill="currentColor"></circle>
+          </svg>
+        </div>
+        <div class="product-info">
+          <div class="product-vendor">Ouma's Kitchen</div>
+          <div class="product-name">Oat &amp; Honey Cookies</div>
+          <div class="product-price">R65.00</div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-photo photo-butter">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 2h6"></path>
+            <path d="M10 2v4.2a2 2 0 0 1-.6 1.4L8 9v11a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V9l-1.4-1.4A2 2 0 0 1 14 6.2V2"></path>
+            <line x1="8.5" y1="14" x2="15.5" y2="14"></line>
+          </svg>
+        </div>
+        <div class="product-info">
+          <div class="product-vendor">Naledi Naturals</div>
+          <div class="product-name">Whipped Shea Body Butter</div>
+          <div class="product-price">R120.00</div>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-photo photo-bag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+            <path d="M3 6h18"></path>
+            <path d="M16 10a4 4 0 0 1-8 0"></path>
+          </svg>
+        </div>
+        <div class="product-info">
+          <div class="product-vendor">Zanele Beadwork</div>
+          <div class="product-name">Beaded Woven Tote Bag</div>
+          <div class="product-price">R385.00</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const root = document.documentElement;
+    const toggle = document.getElementById('theme-toggle');
+    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    root.setAttribute('data-theme', prefersLight ? 'light' : 'dark');
+
+    toggle.addEventListener('click', () => {
+      const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+    });
+  </script>
+
+</body>
+</html>
+ 
