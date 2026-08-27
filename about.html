@@ -1,914 +1,244 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LocalCart — Discover local South African makers</title>
-<style>
-  :root, [data-theme="dark"]{
-    --bg: #141416;
-    --card: #1e1e22;
-    --card-hover: #26262b;
-    --border: #2c2c31;
-    --text: #f5f5f4;
-    --text-muted: #9b9ba3;
-    --text-faint: #6f6f78;
-    --accent: #f0811f;
-    --accent-hover: #ff9433;
-    --accent-ink: #17110a;
-    --shadow: rgba(0,0,0,0.35);
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  [data-theme="light"]{
-    --bg: #fbfaf8;
-    --card: #ffffff;
-    --card-hover: #f3f2ef;
-    --border: #e6e3dd;
-    --text: #17161a;
-    --text-muted: #5c5a63;
-    --text-faint: #8f8d95;
-    --accent: #e8760f;
-    --accent-hover: #d3690a;
-    --accent-ink: #ffffff;
-    --shadow: rgba(20,20,22,0.08);
-  }
+  <title>About — LocalCart</title>
 
-  *{ box-sizing: border-box; }
-
-  html, body{
-    margin:0;
-    padding:0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    transition: background .2s ease, color .2s ease;
-  }
-
-  a{ color: inherit; text-decoration: none; }
-  svg{ display:block; }
-
-  /* ---------- Header ---------- */
-  header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding: 18px 40px;
-    border-bottom: 1px solid var(--border);
-    gap: 24px;
-  }
-
-  .logo{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    font-weight: 700;
-    font-size: 19px;
-    letter-spacing: -0.01em;
-    flex-shrink:0;
-  }
-
-  .logo-mark{
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--accent-soft, rgba(106,92,255,0.14));
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color: #6a5cff;
-    flex-shrink:0;
-  }
-
-  nav{
-    display:flex;
-    align-items:center;
-    gap: 32px;
-    font-size: 14.5px;
-    font-weight: 500;
-  }
-
-  nav a{
-    color: var(--text-muted);
-    position: relative;
-    padding-bottom: 4px;
-    transition: color .15s ease;
-  }
-  nav a:hover{ color: var(--text); }
-  nav a.active{ color: var(--accent); }
-  nav a.active::after{
-    content:"";
-    position:absolute;
-    left:0; right:0; bottom:-14px;
-    height:2px;
-    background: var(--accent);
-  }
-
-  .header-right{
-    display:flex;
-    align-items:center;
-    gap: 14px;
-  }
-
-  .search-box{
-    display:flex;
-    align-items:center;
-    gap: 8px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 9px 16px;
-    color: var(--text-faint);
-    font-size: 13.5px;
-    min-width: 200px;
-    transition: border-color .15s ease;
-  }
-  .search-box:focus-within{ border-color: var(--accent); }
-  .search-box input{
-    background: none;
-    border: none;
-    outline: none;
-    color: var(--text);
-    font-size: 13.5px;
-    width: 100%;
-    font-family: inherit;
-  }
-  .search-box input::placeholder{ color: var(--text-faint); }
-
-  .icon-btn{
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    width: 36px;
-    height: 36px;
-    padding:0;
-    border-radius: 50%;
-    flex-shrink:0;
-    transition: background .15s ease, border-color .15s ease, transform .15s ease;
-  }
-  .icon-btn:hover{ background: var(--card-hover); border-color: #3a3a41; }
-  .icon-btn:active{ transform: scale(0.94); }
-
-  #theme-toggle .icon-moon{ display: none; }
-  [data-theme="light"] #theme-toggle .icon-sun{ display: none; }
-  [data-theme="light"] #theme-toggle .icon-moon{ display: block; }
-
-  .avatar{
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6a5cff, #b23fd8);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size: 13px;
-    font-weight: 700;
-    color: #fff;
-    flex-shrink:0;
-    border: 2px solid var(--border);
-  }
-
-  /* ---------- Hero ---------- */
-  .hero{
-    text-align:center;
-    padding: 84px 24px 76px;
-    border-bottom: 1px solid var(--border);
-  }
-  .hero h1{
-    font-size: clamp(30px, 4vw, 42px);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    margin: 0 0 18px;
-  }
-  .hero p{
-    color: var(--text-muted);
-    font-size: 16.5px;
-    max-width: 520px;
-    margin: 0 auto 34px;
-    line-height: 1.55;
-  }
-  .btn-primary{
-    display:inline-block;
-    background: var(--accent);
-    color: var(--accent-ink);
-    font-weight: 700;
-    font-size: 15px;
-    padding: 13px 26px;
-    border-radius: 10px;
-    border:none;
-    cursor:pointer;
-    transition: background .15s ease, transform .15s ease;
-  }
-  .btn-primary:hover{
-    background: var(--accent-hover);
-    transform: translateY(-1px);
-  }
-
-  /* ---------- Sections ---------- */
-  section.content{
-    padding: 44px 40px 20px;
-  }
-  section.content + section.content{ padding-top: 8px; }
-
-  h2.section-title{
-    font-size: 19px;
-    font-weight: 700;
-    margin: 0 0 20px;
-    letter-spacing: -0.01em;
-  }
-
-  /* ---------- Categories ---------- */
-  .categories{
-    display:grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-  }
-  .category-card{
-    display:flex;
-    align-items:center;
-    gap: 12px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 18px;
-    cursor:pointer;
-    transition: background .15s ease, border-color .15s ease, transform .15s ease;
-  }
-  .category-card:hover{
-    background: var(--card-hover);
-    border-color: #3a3a41;
-    transform: translateY(-2px);
-  }
-  .category-icon{
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-shrink:0;
-  }
-  .category-card span.label{ font-weight: 600; font-size: 15px; }
-
-  .icon-food{ background: rgba(240,129,31,0.16); color: #f0811f; }
-  .icon-fashion{ background: rgba(90,110,255,0.16); color: #6a7bff; }
-  .icon-skincare{ background: rgba(56,180,120,0.16); color: #3fc07f; }
-  .icon-crafts{ background: rgba(20,180,170,0.16); color: #1fc3b4; }
-
-  /* ---------- Products ---------- */
-  .products{
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-    padding-bottom: 60px;
-  }
-  .product-card{
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    cursor:pointer;
-    transition: transform .18s ease, border-color .18s ease;
-  }
-  .product-card:hover{
-    transform: translateY(-4px);
-    border-color: #3a3a41;
-  }
-  .product-photo{
-    height: 210px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    position:relative;
-    color: rgba(255,255,255,0.92);
-  }
-  .product-photo svg{ width: 56px; height: 56px; }
-  .product-info{
-    padding: 16px 18px 18px;
-  }
-  .product-vendor{
-    font-size: 12px;
-    color: var(--text-faint);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
-  .product-name{
-    font-size: 15.5px;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-  .product-price{
-    color: var(--accent);
-    font-weight: 700;
-    font-size: 15px;
-  }
-
-  .photo-cookies{ background: radial-gradient(ellipse at 50% 30%, #8a6642, #4a3520); }
-  .photo-butter{ background: radial-gradient(ellipse at 50% 30%, #cbb98f, #8a7a54); }
-  .photo-bag{ background: radial-gradient(ellipse at 50% 30%, #d3455a, #7a2140); }
-  .photo-tea{ background: radial-gradient(ellipse at 50% 30%, #6f8f52, #37471f); }
-  .photo-jam{ background: radial-gradient(ellipse at 50% 30%, #b8443f, #601f1c); }
-  .photo-dress{ background: radial-gradient(ellipse at 50% 30%, #5a6ad0, #2b3170); }
-  .photo-sandals{ background: radial-gradient(ellipse at 50% 30%, #a9825a, #5c4227); }
-  .photo-headwrap{ background: radial-gradient(ellipse at 50% 30%, #d68a3c, #7a4713); }
-  .photo-soap{ background: radial-gradient(ellipse at 50% 30%, #6b6b6b, #2c2c2c); }
-  .photo-lipbalm{ background: radial-gradient(ellipse at 50% 30%, #d17a92, #7a2f42); }
-  .photo-bowl{ background: radial-gradient(ellipse at 50% 30%, #c48b5e, #6b4626); }
-  .photo-basket{ background: radial-gradient(ellipse at 50% 30%, #c7a35c, #71571f); }
-
-  .category-pill{
-    display:inline-block;
-    font-size: 10.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 14%, transparent);
-    padding: 3px 9px;
-    border-radius: 999px;
-    margin-bottom: 8px;
-  }
-
-  /* ---------- Footer ---------- */
-  .site-footer{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-    gap: 18px;
-    padding: 48px 24px 40px;
-    border-top: 1px solid var(--border);
-  }
-  .footer-logo{
-    display:flex;
-    align-items:center;
-    gap: 9px;
-    font-weight: 700;
-    font-size: 16px;
-  }
-  .footer-logo .logo-mark{
-    width: 28px;
-    height: 28px;
-  }
-  .footer-links{
-    display:flex;
-    flex-wrap: wrap;
-    justify-content:center;
-    gap: 28px;
-    font-size: 13.5px;
-    font-weight: 500;
-  }
-  .footer-links a{
-    color: var(--text-muted);
-    transition: color .15s ease;
-  }
-  .footer-links a:hover{ color: var(--text); }
-
-  .footer-social{
-    display:flex;
-    gap: 12px;
-  }
-  .social-btn{
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--card);
-    border: 1px solid var(--border);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color: var(--text-muted);
-    transition: background .15s ease, border-color .15s ease, color .15s ease, transform .15s ease;
-  }
-  .social-btn:hover{
-    background: var(--card-hover);
-    border-color: var(--accent);
-    color: var(--accent);
-    transform: translateY(-2px);
-  }
-
-  .footer-copy{
-    font-size: 12.5px;
-    color: var(--text-faint);
-    margin: 6px 0 0;
-  }
-
-  /* ---------- Cart ---------- */
-  .cart-wrap{ position: relative; }
-
-  .cart-count{
-    position:absolute;
-    top: -4px;
-    right: -4px;
-    min-width: 17px;
-    height: 17px;
-    padding: 0 4px;
-    border-radius: 999px;
-    background: var(--accent);
-    color: var(--accent-ink);
-    font-size: 10.5px;
-    font-weight: 700;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    line-height: 1;
-  }
-  .cart-count[hidden]{ display:none; }
-
-  .cart-panel{
-    position:absolute;
-    top: calc(100% + 12px);
-    right: 0;
-    width: 320px;
-    max-height: 420px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    box-shadow: 0 12px 32px var(--shadow);
-    padding: 16px;
-    display:flex;
-    flex-direction:column;
-    gap: 12px;
-    z-index: 50;
-  }
-  .cart-panel[hidden]{ display:none; }
-  .cart-panel-header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    font-weight: 700;
-    font-size: 14.5px;
-  }
-  .cart-clear{
-    background:none;
-    border:none;
-    color: var(--text-faint);
-    font-size: 12.5px;
-    cursor:pointer;
-    font-family: inherit;
-    transition: color .15s ease;
-  }
-  .cart-clear:hover{ color: var(--accent); }
-
-  .cart-items{
-    list-style:none;
-    margin:0;
-    padding:0;
-    max-height: 230px;
-    overflow-y: auto;
-    display:flex;
-    flex-direction:column;
-    gap: 10px;
-  }
-  .cart-empty{
-    color: var(--text-faint);
-    font-size: 13px;
-    text-align:center;
-    padding: 18px 0;
-  }
-  .cart-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap: 10px;
-    font-size: 13px;
-  }
-  .cart-item-info{ min-width:0; }
-  .cart-item-name{
-    font-weight: 600;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .cart-item-meta{
-    color: var(--text-faint);
-    font-size: 11.5px;
-  }
-  .cart-item-right{
-    display:flex;
-    align-items:center;
-    gap: 8px;
-    flex-shrink:0;
-  }
-  .cart-item-price{ font-weight: 600; color: var(--accent); font-size: 12.5px; }
-  .cart-item-remove{
-    background:none;
-    border:none;
-    color: var(--text-faint);
-    cursor:pointer;
-    font-size: 15px;
-    line-height:1;
-    padding: 2px;
-    transition: color .15s ease;
-  }
-  .cart-item-remove:hover{ color: #e5484d; }
-
-  .cart-panel-footer{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    font-weight: 700;
-    font-size: 14px;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-  }
-  .cart-checkout{
-    width: 100%;
-    padding: 11px;
-    font-size: 14px;
-  }
-  .cart-checkout:disabled{
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform:none !important;
-  }
-
-  /* ---------- Category active state ---------- */
-  .category-card.active{
-    background: var(--accent-soft, rgba(240,129,31,0.14));
-    border-color: var(--accent);
-  }
-  .category-card:focus-visible,
-  .icon-btn:focus-visible,
-  .btn-primary:focus-visible,
-  .btn-add-cart:focus-visible{
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-
-  /* ---------- Add to cart button ---------- */
-  .btn-add-cart{
-    margin-top: 12px;
-    width: 100%;
-    padding: 9px 0;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 600;
-    cursor:pointer;
-    transition: background .15s ease, border-color .15s ease, color .15s ease;
-  }
-  .btn-add-cart:hover{
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-ink);
-  }
-  .btn-add-cart.added{
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-ink);
-  }
-
-  .empty-state{
-    color: var(--text-faint);
-    font-size: 14px;
-    padding: 30px 0;
-    text-align:center;
-  }
-
-  /* ---------- Responsive ---------- */
-  @media (max-width: 880px){
-    header{ padding: 14px 20px; flex-wrap: wrap; }
-    nav{ order: 3; width:100%; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--border); margin-top: 10px; }
-    .search-box{ min-width: 120px; }
-    section.content{ padding: 32px 20px 12px; }
-    .categories{ grid-template-columns: repeat(2, 1fr); }
-    .products{ grid-template-columns: 1fr; }
-    .hero{ padding: 56px 20px 48px; }
-    .cart-panel{ width: min(320px, calc(100vw - 40px)); right: -10px; }
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    *{ transition: none !important; }
-  }
-</style>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
 
+<body id="top">
+
+  <!-- ================= HEADER ================= -->
   <header>
+
     <div class="logo">
       <span class="logo-mark">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
           <path d="M3 6h18"></path>
           <path d="M16 10a4 4 0 0 1-8 0"></path>
         </svg>
       </span>
+
       LocalCart
     </div>
 
+
+    <!-- Navigation -->
     <nav>
-      <a href="#" class="active">Shop</a>
-      <a href="#">Vendors</a>
-      <a href="#">About</a>
+      <a href="index.html">Dashboard</a>
+      <a href="featured-products.html">Vendors</a>
+      <a href="about.html" class="active">About</a>
+      <a href="subscribe.html">Subscribe</a>
     </nav>
 
+
+    <!-- Right side of header -->
     <div class="header-right">
-      <button class="icon-btn" id="theme-toggle" aria-label="Toggle light and dark mode">
-        <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+      <!-- Theme toggle -->
+      <button
+        class="icon-btn"
+        id="theme-toggle"
+        aria-label="Toggle light and dark mode"
+        type="button"
+      >
+
+        <!-- Sun -->
+        <svg
+          class="icon-sun"
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <circle cx="12" cy="12" r="4"></circle>
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+          <path
+            d="M12 2v2
+               M12 20v2
+               M4.93 4.93l1.41 1.41
+               M17.66 17.66l1.41 1.41
+               M2 12h2
+               M20 12h2
+               M4.93 19.07l1.41-1.41
+               M17.66 6.34l1.41-1.41"
+          ></path>
         </svg>
-        <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+        <!-- Moon -->
+        <svg
+          class="icon-moon"
+          width="17"
+          height="17"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
         </svg>
+
       </button>
 
+
+      <!-- Search -->
       <label class="search-box">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        <input type="text" id="search-input" placeholder="Search…" aria-label="Search products" />
+        <svg
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Search..."
+          aria-label="Search products"
+        />
       </label>
 
-      <div class="cart-wrap">
-        <button class="icon-btn" id="cart-button" aria-label="View cart" aria-expanded="false">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-          <span class="cart-count" id="cart-count" hidden>0</span>
-        </button>
 
-        <div class="cart-panel" id="cart-panel" hidden>
-          <div class="cart-panel-header">
-            <span>Your cart</span>
-            <button class="cart-clear" id="cart-clear" type="button">Clear</button>
-          </div>
-          <ul class="cart-items" id="cart-items">
-            <li class="cart-empty">Your cart is empty.</li>
-          </ul>
-          <div class="cart-panel-footer">
-            <span>Subtotal</span>
-            <span id="cart-subtotal">R0.00</span>
-          </div>
-          <button class="btn-primary cart-checkout" id="cart-checkout" type="button">Checkout</button>
-        </div>
-      </div>
+      <!-- Cart -->
+      <a
+        href="cart.html"
+        class="icon-btn"
+        id="cart-button"
+        aria-label="Cart"
+      >
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
 
+        <span id="cart-count" aria-live="polite">0</span>
+      </a>
+
+
+      <!-- User avatar -->
       <div class="avatar">TM</div>
+
     </div>
+
   </header>
 
-  <section class="hero">
-    <h1>Welcome back, Thandiwe</h1>
-    <p>Discover new products from your favorite local South African artisans and small businesses.</p>
-    <button class="btn-primary" id="browse-btn">Browse products</button>
+
+  <!-- ================= ABOUT ================= -->
+  <section class="about-hero">
+    <h1>Built for local businesses</h1>
+
+    <p>
+      LocalCart gives small businesses and independent makers a place to sell
+      online without building a website of their own, and gives shoppers one
+      place to discover and support them.
+    </p>
   </section>
 
-  <section class="content">
-    <h2 class="section-title">Categories</h2>
-    <div class="categories" id="categories-row">
-      <div class="category-card" data-category="Food" tabindex="0" role="button">
-        <div class="category-icon icon-food">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"></path>
-            <line x1="6" y1="1" x2="6" y2="4"></line>
-            <line x1="10" y1="1" x2="10" y2="4"></line>
-            <line x1="14" y1="1" x2="14" y2="4"></line>
-          </svg>
-        </div>
-        <span class="label">Food</span>
+  <section class="stats">
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"></path>
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+          <path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"></path>
+          <path d="M2 7h20"></path>
+        </svg>
       </div>
-      <div class="category-card" data-category="Fashion" tabindex="0" role="button">
-        <div class="category-icon icon-fashion">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23Z"></path>
-          </svg>
-        </div>
-        <span class="label">Fashion</span>
-      </div>
-      <div class="category-card" data-category="Skincare" tabindex="0" role="button">
-        <div class="category-icon icon-skincare">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2.69s-6 6.2-6 10.31a6 6 0 0 0 12 0c0-4.11-6-10.31-6-10.31Z"></path>
-          </svg>
-        </div>
-        <span class="label">Skincare</span>
-      </div>
-      <div class="category-card" data-category="Crafts" tabindex="0" role="button">
-        <div class="category-icon icon-crafts">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="6" cy="6" r="3"></circle>
-            <circle cx="6" cy="18" r="3"></circle>
-            <path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"></path>
-          </svg>
-        </div>
-        <span class="label">Crafts</span>
-      </div>
+      <div class="stat-value">40+</div>
+      <div class="stat-label">Local vendors</div>
     </div>
-  </section>
 
-  <section class="content">
-    <h2 class="section-title">Featured products</h2>
-    <p class="empty-state" id="empty-state" hidden>No products match your search.</p>
-    <div class="products" id="products-grid">
-      <div class="product-card" data-category="Food" data-name="Oat & Honey Cookies" data-vendor="Ouma's Kitchen" data-price="65.00">
-        <div class="product-photo photo-cookies">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"></circle>
-            <circle cx="9" cy="10" r="1" fill="currentColor"></circle>
-            <circle cx="14" cy="9" r="1" fill="currentColor"></circle>
-            <circle cx="15" cy="14" r="1" fill="currentColor"></circle>
-            <circle cx="10" cy="15" r="1" fill="currentColor"></circle>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Food</span>
-          <div class="product-vendor">Ouma's Kitchen</div>
-          <div class="product-name">Oat &amp; Honey Cookies</div>
-          <div class="product-price">R65.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="m7.5 4.27 9 5.15"></path>
+          <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path>
+          <path d="m3.3 7 8.7 5 8.7-5"></path>
+          <path d="M12 22V12"></path>
+        </svg>
       </div>
-
-      <div class="product-card" data-category="Food" data-name="Rooibos Loose-Leaf Tea" data-vendor="Karoo Tea Co." data-price="45.00">
-        <div class="product-photo photo-tea">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-            <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4Z"></path>
-            <line x1="6" y1="1" x2="6" y2="4"></line>
-            <line x1="10" y1="1" x2="10" y2="4"></line>
-            <line x1="14" y1="1" x2="14" y2="4"></line>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Food</span>
-          <div class="product-vendor">Karoo Tea Co.</div>
-          <div class="product-name">Rooibos Loose-Leaf Tea</div>
-          <div class="product-price">R45.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Food" data-name="Homemade Peach Jam" data-vendor="Ma Rosa's Pantry" data-price="55.00">
-        <div class="product-photo photo-jam">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 2h6"></path>
-            <path d="M10 2v4.2a2 2 0 0 1-.6 1.4L8 9v11a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V9l-1.4-1.4A2 2 0 0 1 14 6.2V2"></path>
-            <line x1="8.5" y1="14" x2="15.5" y2="14"></line>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Food</span>
-          <div class="product-vendor">Ma Rosa's Pantry</div>
-          <div class="product-name">Homemade Peach Jam</div>
-          <div class="product-price">R55.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Fashion" data-name="Hand-Stitched Shweshwe Dress" data-vendor="Nomvula Designs" data-price="450.00">
-        <div class="product-photo photo-dress">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23Z"></path>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Fashion</span>
-          <div class="product-vendor">Nomvula Designs</div>
-          <div class="product-name">Hand-Stitched Shweshwe Dress</div>
-          <div class="product-price">R450.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Fashion" data-name="Handmade Leather Sandals" data-vendor="Kaross Footwear" data-price="290.00">
-        <div class="product-photo photo-sandals">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 14c0-3 2-5 5-5h6a5 5 0 0 1 5 5v1a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3Z"></path>
-            <path d="M8 9V6a2 2 0 0 1 2-2h1"></path>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Fashion</span>
-          <div class="product-vendor">Kaross Footwear</div>
-          <div class="product-name">Handmade Leather Sandals</div>
-          <div class="product-price">R290.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Fashion" data-name="Kente-Print Headwrap" data-vendor="Amahle Threads" data-price="95.00">
-        <div class="product-photo photo-headwrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 18c2-6 6-9 9-9s7 3 9 9"></path>
-            <path d="M5 18h14"></path>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Fashion</span>
-          <div class="product-vendor">Amahle Threads</div>
-          <div class="product-name">Kente-Print Headwrap</div>
-          <div class="product-price">R95.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Skincare" data-name="Whipped Shea Body Butter" data-vendor="Naledi Naturals" data-price="120.00">
-        <div class="product-photo photo-butter">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2.69s-6 6.2-6 10.31a6 6 0 0 0 12 0c0-4.11-6-10.31-6-10.31Z"></path>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Skincare</span>
-          <div class="product-vendor">Naledi Naturals</div>
-          <div class="product-name">Whipped Shea Body Butter</div>
-          <div class="product-price">R120.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Skincare" data-name="African Black Soap Bar" data-vendor="Baraka Botanicals" data-price="48.00">
-        <div class="product-photo photo-soap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="8" width="16" height="11" rx="3"></rect>
-            <path d="M8 8V6a4 4 0 0 1 8 0v2"></path>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Skincare</span>
-          <div class="product-vendor">Baraka Botanicals</div>
-          <div class="product-name">African Black Soap Bar</div>
-          <div class="product-price">R48.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Skincare" data-name="Rooibos & Honey Lip Balm" data-vendor="Naledi Naturals" data-price="35.00">
-        <div class="product-photo photo-lipbalm">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="8" y="2" width="8" height="7" rx="2"></rect>
-            <path d="M9 9v9a3 3 0 0 0 6 0V9"></path>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Skincare</span>
-          <div class="product-vendor">Naledi Naturals</div>
-          <div class="product-name">Rooibos &amp; Honey Lip Balm</div>
-          <div class="product-price">R35.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Crafts" data-name="Beaded Woven Tote Bag" data-vendor="Zanele Beadwork" data-price="385.00">
-        <div class="product-photo photo-bag">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
-            <path d="M3 6h18"></path>
-            <path d="M16 10a4 4 0 0 1-8 0"></path>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Crafts</span>
-          <div class="product-vendor">Zanele Beadwork</div>
-          <div class="product-name">Beaded Woven Tote Bag</div>
-          <div class="product-price">R385.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Crafts" data-name="Hand-Thrown Clay Bowl" data-vendor="Studio Umuzi" data-price="220.00">
-        <div class="product-photo photo-bowl">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 12h18a9 6 0 0 1-18 0Z"></path>
-            <path d="M8 12V9a4 4 0 0 1 8 0v3"></path>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Crafts</span>
-          <div class="product-vendor">Studio Umuzi</div>
-          <div class="product-name">Hand-Thrown Clay Bowl</div>
-          <div class="product-price">R220.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
-
-      <div class="product-card" data-category="Crafts" data-name="Woven Sisal Basket" data-vendor="Kwazi Weaves" data-price="165.00">
-        <div class="product-photo photo-basket">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="6" cy="6" r="3"></circle>
-            <circle cx="6" cy="18" r="3"></circle>
-            <path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"></path>
-          </svg>
-        </div>
-        <div class="product-info">
-          <span class="category-pill">Crafts</span>
-          <div class="product-vendor">Kwazi Weaves</div>
-          <div class="product-name">Woven Sisal Basket</div>
-          <div class="product-price">R165.00</div>
-          <button class="btn-add-cart" type="button">Add to cart</button>
-        </div>
-      </div>
+      <div class="stat-value">500+</div>
+      <div class="stat-label">Products listed</div>
     </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path>
+        </svg>
+      </div>
+      <div class="stat-value">1,200+</div>
+      <div class="stat-label">Orders fulfilled</div>
+    </div>
+
   </section>
 
+
+  <!-- ================= FOOTER ================= -->
   <footer class="site-footer">
     <div class="footer-logo">
       <span class="logo-mark">
@@ -928,43 +258,12 @@
       <a href="#">Contact</a>
     </nav>
 
-    <div class="footer-social">
-      <a href="#" class="social-btn" aria-label="Instagram">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="2" width="20" height="20" rx="5"></rect>
-          <circle cx="12" cy="12" r="4"></circle>
-          <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
-        </svg>
-      </a>
-      <a href="#" class="social-btn" aria-label="Facebook">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3Z"></path>
-        </svg>
-      </a>
-      <a href="#" class="social-btn" aria-label="X (Twitter)">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="4" y1="4" x2="20" y2="20"></line>
-          <line x1="20" y1="4" x2="4" y2="20"></line>
-        </svg>
-      </a>
-      <a href="#" class="social-btn" aria-label="TikTok">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 18a4 4 0 1 0 4-4V2"></path>
-          <path d="M13 6a6 6 0 0 0 6 6"></path>
-        </svg>
-      </a>
-      <a href="#" class="social-btn" aria-label="WhatsApp">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.55L3 21l2.05-5.4A8.5 8.5 0 1 1 21 11.5Z"></path>
-          <path d="M8.5 10.5c.3 2.4 2.6 4.7 5 5"></path>
-        </svg>
-      </a>
-    </div>
-
     <p class="footer-copy">© 2026 LocalCart. Supporting small South African businesses.</p>
   </footer>
 
-  <script src="script.js"></script>
+
+  <!-- JavaScript -->
+  <script src="index.js"></script>
 
 </body>
 </html>
