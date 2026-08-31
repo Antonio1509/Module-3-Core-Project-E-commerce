@@ -62,11 +62,18 @@ function renderVendor() {
   document.getElementById("store-category").textContent = vendor.category;
   document.getElementById("store-name").textContent = vendor.name;
 
+  const followingCount = getFollowing(vendor.id).length;
+  const followersCount = getFollowers(vendor.id).length;
+
   document.getElementById("store-stats").innerHTML = `
     <span>${pinIcon()} ${vendor.location}</span>
     <span>${starIcon()} ${vendor.rating.toFixed(1)} (${vendor.reviewCount} reviews)</span>
     <span>${boxIcon()} ${getProductsByVendor(vendor.id).length} products</span>
+    <button class="stat-link" data-open-network="following"><strong>${followingCount}</strong> Following</button>
+    <button class="stat-link" data-open-network="followers"><strong>${followersCount}</strong> Followers</button>
   `;
+
+  setupNetworkModal(vendor.id);
 
   document.getElementById("about-text").textContent = vendor.about;
   document.getElementById("info-location").textContent = vendor.location;
@@ -104,6 +111,75 @@ function renderVendor() {
       btn.classList.add("active");
       document.getElementById(`panel-${btn.dataset.tab}`).classList.add("active");
     });
+  });
+}
+
+/* ---------- Following / Followers modal ---------- */
+function chevronIcon() {
+  return `<svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>`;
+}
+
+function renderNetworkItem(vendor) {
+  const el = document.createElement("a");
+  el.className = "network-item";
+  // Navigating to another vendor's own profile — clicking anywhere on
+  // the row takes you straight to that vendor's storefront.
+  el.href = `vendor.html?id=${vendor.id}`;
+  el.innerHTML = `
+    <div class="network-logo">${vendor.logoText}</div>
+    <div class="network-info">
+      <h4>${vendor.name}</h4>
+      <p>${vendor.category} · ${vendor.location}</p>
+    </div>
+    ${chevronIcon()}
+  `;
+  return el;
+}
+
+function setupNetworkModal(vendorId) {
+  const overlay = document.getElementById("network-modal");
+  const listEl = document.getElementById("network-list");
+  const closeBtn = document.getElementById("network-close");
+  const toggleBtns = document.querySelectorAll(".modal-toggle-btn");
+
+  function renderList(kind) {
+    const vendors = kind === "following" ? getFollowing(vendorId) : getFollowers(vendorId);
+    listEl.innerHTML = "";
+
+    if (vendors.length === 0) {
+      const label = kind === "following" ? "isn't following any vendors yet" : "doesn't have any vendor followers yet";
+      listEl.innerHTML = `<div class="modal-empty">This vendor ${label}.</div>`;
+      return;
+    }
+
+    vendors.forEach(v => listEl.appendChild(renderNetworkItem(v)));
+  }
+
+  function openModal(kind) {
+    toggleBtns.forEach(b => b.classList.toggle("active", b.dataset.list === kind));
+    renderList(kind);
+    overlay.classList.add("open");
+  }
+
+  function closeModal() {
+    overlay.classList.remove("open");
+  }
+
+  // "X Following" / "Y Followers" stat buttons open the modal on the right tab
+  document.querySelectorAll("[data-open-network]").forEach(btn => {
+    btn.addEventListener("click", () => openModal(btn.dataset.openNetwork));
+  });
+
+  toggleBtns.forEach(btn => {
+    btn.addEventListener("click", () => openModal(btn.dataset.list));
+  });
+
+  closeBtn.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeModal(); // click outside the panel closes it
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
   });
 }
 
