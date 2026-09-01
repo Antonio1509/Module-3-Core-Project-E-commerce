@@ -54,3 +54,50 @@ function addToCart(product, btnEl) {
   }
   showToast(`${product.name} added to cart`);
 }
+
+/* =========================================================
+   Profile toggle (header avatar dropdown)
+   Present on every page that includes this script and the
+   standard header markup: a button#profile-toggle next to a
+   hidden panel#profile-dropdown. Populates the panel from the
+   current user in data.js, so it only runs once data.js exists.
+   ========================================================= */
+(function () {
+  const toggle = document.getElementById("profile-toggle");
+  const dropdown = document.getElementById("profile-dropdown");
+  if (!toggle || !dropdown) return; // page doesn't use the header dropdown
+
+  // Fill in the current user's details, if data.js's getCurrentUser() is available
+  if (typeof getCurrentUser === "function") {
+    const user = getCurrentUser();
+    if (user) {
+      const nameEl = dropdown.querySelector("[data-profile-name]");
+      const emailEl = dropdown.querySelector("[data-profile-email]");
+      const avatarEl = toggle.querySelector(".avatar");
+      if (nameEl) nameEl.textContent = user.name;
+      if (emailEl) emailEl.textContent = user.email;
+      if (avatarEl) avatarEl.textContent = user.avatarInitials;
+    }
+  }
+
+  function openDropdown() {
+    dropdown.classList.add("open");
+    toggle.setAttribute("aria-expanded", "true");
+  }
+  function closeDropdown() {
+    dropdown.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
+  }
+
+  toggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdown.classList.contains("open") ? closeDropdown() : openDropdown();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!dropdown.contains(e.target) && !toggle.contains(e.target)) closeDropdown();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeDropdown();
+  });
+})();

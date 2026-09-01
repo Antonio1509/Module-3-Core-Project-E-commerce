@@ -265,6 +265,121 @@ function getFollowers(vendorId) {
   return vendor.followers.map(id => getVendorById(id)).filter(Boolean);
 }
 
+/* =========================================================
+   Shoppers (site users) — separate from the vendor-to-vendor
+   network above. A "user" is a logged-in customer who can
+   follow vendor storefronts and edit their own profile.
+   ========================================================= */
+
+const USERS = [
+  {
+    id: "u1",
+    name: "Thabo Mokoena",
+    email: "thabo@example.com",
+    location: "Durban, KZN",
+    joined: "Jan 2025",
+    bio: "Foodie, craft-market regular, always hunting for local finds.",
+    avatarInitials: "TM",
+    followingVendors: ["v1", "v3", "v7", "v8"]
+  },
+  {
+    id: "u2",
+    name: "Aisha Adams",
+    email: "aisha@example.com",
+    location: "Cape Town, WC",
+    joined: "Mar 2025",
+    bio: "Skincare enthusiast and weekend market regular.",
+    avatarInitials: "AA",
+    followingVendors: ["v2", "v3", "v9"]
+  },
+  {
+    id: "u3",
+    name: "Sipho Nkosi",
+    email: "sipho@example.com",
+    location: "Johannesburg, GP",
+    joined: "Jun 2024",
+    bio: "Street food connoisseur, never misses a food truck weekend.",
+    avatarInitials: "SN",
+    followingVendors: ["v4", "v7"]
+  }
+];
+
+// The demo "logged-in" shopper. In a real build this would come
+// from the JWT/session after login, not a hardcoded constant.
+const CURRENT_USER_ID = "u1";
+
+const FOLLOW_STATE_KEY = "localcart-user-follows";
+const PROFILE_OVERRIDE_KEY_PREFIX = "localcart-user-profile-";
+
+// Follow relationships are seeded from USERS on first load, then
+// persisted in localStorage so toggling Follow survives a refresh.
+function loadFollowState() {
+  const raw = localStorage.getItem(FOLLOW_STATE_KEY);
+  if (raw) return JSON.parse(raw);
+
+  const seeded = {};
+  USERS.forEach(u => { seeded[u.id] = [...u.followingVendors]; });
+  localStorage.setItem(FOLLOW_STATE_KEY, JSON.stringify(seeded));
+  return seeded;
+}
+
+function saveFollowState(state) {
+  localStorage.setItem(FOLLOW_STATE_KEY, JSON.stringify(state));
+}
+
+function getUserById(id) {
+  return USERS.find(u => u.id === id) || null;
+}
+
+// Merges the mock user with any profile edits saved to localStorage
+function getCurrentUser() {
+  const base = getUserById(CURRENT_USER_ID);
+  if (!base) return null;
+  const overrideRaw = localStorage.getItem(PROFILE_OVERRIDE_KEY_PREFIX + CURRENT_USER_ID);
+  const overrides = overrideRaw ? JSON.parse(overrideRaw) : {};
+  return { ...base, ...overrides };
+}
+
+function saveCurrentUserProfile(updates) {
+  localStorage.setItem(PROFILE_OVERRIDE_KEY_PREFIX + CURRENT_USER_ID, JSON.stringify(updates));
+}
+
+function isFollowingVendor(userId, vendorId) {
+  const state = loadFollowState();
+  return (state[userId] || []).includes(vendorId);
+}
+
+// Toggles follow status for a user/vendor pair and returns the new state
+function toggleFollowVendor(userId, vendorId) {
+  const state = loadFollowState();
+  const list = state[userId] || (state[userId] = []);
+  const index = list.indexOf(vendorId);
+  let nowFollowing;
+
+  if (index >= 0) {
+    list.splice(index, 1);
+    nowFollowing = false;
+  } else {
+    list.push(vendorId);
+    nowFollowing = true;
+  }
+
+  saveFollowState(state);
+  return nowFollowing;
+}
+
+// Full vendor objects a given user follows (used on the profile page)
+function getUserFollowingVendors(userId) {
+  const state = loadFollowState();
+  return (state[userId] || []).map(id => getVendorById(id)).filter(Boolean);
+}
+
+// How many shoppers follow a given vendor (used on the storefront)
+function getVendorFollowerUserCount(vendorId) {
+  const state = loadFollowState();
+  return Object.values(state).filter(list => list.includes(vendorId)).length;
+}
+
 function formatPrice(amount) {
   return "R" + amount.toLocaleString("en-ZA");
 }
