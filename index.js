@@ -1,6 +1,7 @@
 /* ==========================================================
    LOCALCART - COMPLETE FUNCTIONALITY
    Includes: index.html, about.html, vendor-dashboard.html
+   With Avatar Panel - User History Feature
 ========================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -17,7 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
   initCart();
   initVendorDashboard();
   initAboutPage();
-  initVendorSwitcher();
+  // initVendorSwitcher(); // REMOVED - No longer needed
+  initAvatarPanel();           // Avatar user history
+  initVendorFollowButtons();   // Follow buttons on products
+  initProductViewTracking();   // Track product views
+  initAddProductButton();      // Add product button navigation
 
 });
 
@@ -142,6 +147,278 @@ function switchVendor(vendorName) {
 }
 
 // ==========================================================
+// AVATAR PANEL - USER HISTORY
+// ==========================================================
+
+const SEARCH_HISTORY_KEY = 'localcart_recent_searches';
+const VIEWED_KEY = 'localcart_recently_viewed';
+const FOLLOWED_KEY = 'localcart_followed_vendors';
+
+function getList(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveList(key, list) {
+  try { localStorage.setItem(key, JSON.stringify(list)); } catch (e) { /* ignore */ }
+}
+
+function recordSearch(term) {
+  if (!term) return;
+  let list = getList(SEARCH_HISTORY_KEY).filter((t) => t.toLowerCase() !== term.toLowerCase());
+  list.unshift(term);
+  saveList(SEARCH_HISTORY_KEY, list.slice(0, 8));
+}
+
+function recordViewed(name, vendor) {
+  if (!name) return;
+  let list = getList(VIEWED_KEY).filter((p) => !(p.name === name && p.vendor === vendor));
+  list.unshift({ name, vendor });
+  saveList(VIEWED_KEY, list.slice(0, 8));
+}
+
+function isFollowing(vendor) {
+  return getList(FOLLOWED_KEY).includes(vendor);
+}
+
+function toggleFollow(vendor) {
+  const list = getList(FOLLOWED_KEY);
+  const idx = list.indexOf(vendor);
+  if (idx === -1) {
+    list.unshift(vendor);
+  } else {
+    list.splice(idx, 1);
+  }
+  saveList(FOLLOWED_KEY, list);
+  return list.includes(vendor);
+}
+
+function initAvatarPanel() {
+  const avatar = document.getElementById('user-avatar');
+  const panel = document.getElementById('avatar-panel');
+  if (!avatar || !panel) return;
+
+  function renderRow(listId, items, emptyText, mapFn) {
+    const ul = document.getElementById(listId);
+    if (!ul) return;
+    ul.innerHTML = '';
+
+    if (!items.length) {
+      const li = document.createElement('li');
+      li.className = 'avatar-panel-empty';
+      li.textContent = emptyText;
+      ul.appendChild(li);
+      return;
+    }
+
+    items.forEach((raw) => {
+      const { label, onClick, onRemove } = mapFn(raw);
+      const li = document.createElement('li');
+      li.className = 'avatar-panel-item';
+
+      const link = document.createElement('button');
+      link.type = 'button';
+      link.className = 'item-link';
+      link.textContent = label;
+      if (onClick) {
+        link.addEventListener('click', onClick);
+      } else {
+        link.style.cursor = 'default';
+      }
+      li.appendChild(link);
+
+      if (onRemove) {
+        const rm = document.createElement('button');
+        rm.type = 'button';
+        rm.className = 'item-remove';
+        rm.setAttribute('aria-label', `Remove ${label}`);
+        rm.textContent = '\u00d7';
+        rm.addEventListener('click', onRemove);
+        li.appendChild(rm);
+      }
+
+      ul.appendChild(li);
+    });
+  }
+
+  function renderPanel() {
+    renderRow('recent-searches-list', getList(SEARCH_HISTORY_KEY), 'No recent searches.', (term) => ({
+      label: term,
+      onClick: () => { window.location.href = `index.html?q=${encodeURIComponent(term)}`; },
+    }));
+
+    renderRow('recently-viewed-list', getList(VIEWED_KEY), 'No products viewed yet.', (p) => ({
+      label: p.vendor ? `${p.name} · ${p.vendor}` : p.name,
+    }));
+
+    renderRow('followed-vendors-list', getList(FOLLOWED_KEY), "You're not following any vendors yet.", (vendor) => ({
+      label: vendor,
+      onRemove: () => {
+        toggleFollow(vendor);
+        syncFollowButtons();
+        renderPanel();
+      },
+    }));
+
+    // Update badge count
+    updateAvatarBadge();
+  }
+
+  function updateAvatarBadge() {
+    const badge = document.getElementById('avatar-badge');
+    if (!badge) return;
+    const searches = getList(SEARCH_HISTORY_KEY).length;
+    const viewed = getList(VIEWED_KEY).length;
+    const follows = getList(FOLLOWED_KEY).length;
+    const total = searches + viewed + follows;
+    badge.textContent = total;
+    badge.hidden = total === 0;
+  }
+
+  function syncFollowButtons() {
+    document.querySelectorAll('.follow-toggle').forEach((btn) => {
+      btn.classList.toggle('following', isFollowing(btn.dataset.vendor));
+    });
+  }
+
+  window.__localcartRenderAvatarPanel = renderPanel;
+  window.__localcartSyncFollowButtons = syncFollowButtons;
+
+  function openPanel() {
+    panel.hidden = false;
+    avatar.setAttribute('aria-expanded', 'true');
+    renderPanel();
+  }
+
+  function closePanel() {
+    panel.hidden = true;
+    avatar.setAttribute('aria-expanded', 'false');
+  }
+
+  avatar.addEventListener('click', () => {
+    if (panel.hidden) openPanel(); else closePanel();
+  });
+
+  avatar.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      avatar.click();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const path = e.composedPath ? e.composedPath() : [];
+    const clickedInside = path.includes(panel) || path.includes(avatar);
+    if (!panel.hidden && !clickedInside) closePanel();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !panel.hidden) closePanel();
+  });
+
+  panel.addEventListener('click', (e) => {
+    const clearBtn = e.target.closest('.panel-clear');
+    if (!clearBtn) return;
+    const which = clearBtn.dataset.clear;
+    if (which === 'searches') saveList(SEARCH_HISTORY_KEY, []);
+    if (which === 'viewed') saveList(VIEWED_KEY, []);
+    if (which === 'follows') {
+      saveList(FOLLOWED_KEY, []);
+      syncFollowButtons();
+    }
+    renderPanel();
+  });
+
+  // Initial badge update
+  updateAvatarBadge();
+
+  // Keyboard shortcut: Press 'A' to toggle avatar panel
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'a' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      const activeElement = document.activeElement;
+      if (activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName)) return;
+      e.preventDefault();
+      if (panel.hidden) openPanel(); else closePanel();
+    }
+  });
+}
+
+// ==========================================================
+// VENDOR FOLLOW BUTTONS ON PRODUCTS
+// ==========================================================
+
+function initVendorFollowButtons() {
+  document.querySelectorAll('.product-vendor').forEach((el) => {
+    if (el.querySelector('.follow-toggle')) return;
+    const vendorName = el.textContent.trim();
+    if (!vendorName) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'follow-toggle';
+    btn.dataset.vendor = vendorName;
+    btn.setAttribute('aria-label', `Follow ${vendorName}`);
+    btn.innerHTML = '☆';
+    btn.style.cssText = `
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 4px;
+      color: var(--text, #333);
+      transition: color 0.2s;
+      margin-left: 4px;
+    `;
+    
+    if (isFollowing(vendorName)) {
+      btn.classList.add('following');
+      btn.innerHTML = '★';
+      btn.style.color = '#f5a623';
+    }
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const nowFollowing = toggleFollow(vendorName);
+      btn.classList.toggle('following', nowFollowing);
+      btn.innerHTML = nowFollowing ? '★' : '☆';
+      btn.style.color = nowFollowing ? '#f5a623' : '';
+      if (typeof window.__localcartRenderAvatarPanel === 'function') {
+        window.__localcartRenderAvatarPanel();
+      }
+    });
+
+    el.appendChild(btn);
+  });
+}
+
+// ==========================================================
+// PRODUCT VIEW TRACKING
+// ==========================================================
+
+function initProductViewTracking() {
+  document.querySelectorAll('.product-card').forEach((card) => {
+    // Only track if not already tracked
+    if (card.dataset.viewTracked) return;
+    card.dataset.viewTracked = 'true';
+    
+    card.addEventListener('click', (e) => {
+      // Don't track if clicked on add-to-cart button or follow button
+      if (e.target.closest('.btn-add-cart') || e.target.closest('.follow-toggle')) return;
+      if (card.dataset.name) {
+        recordViewed(card.dataset.name, card.dataset.vendor || '');
+        if (typeof window.__localcartRenderAvatarPanel === 'function') {
+          window.__localcartRenderAvatarPanel();
+        }
+      }
+    });
+  });
+}
+
+// ==========================================================
 // THEME TOGGLE
 // ==========================================================
 
@@ -221,6 +498,14 @@ function initSearch() {
 
   searchInput.addEventListener("input", () => {
     applyFilters();
+  });
+
+  // Record searches when Enter is pressed
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const term = searchInput.value.trim();
+      if (term) recordSearch(term);
+    }
   });
 }
 
@@ -413,6 +698,21 @@ function initCart() {
 }
 
 // ==========================================================
+// ADD PRODUCT BUTTON NAVIGATION
+// ==========================================================
+
+function initAddProductButton() {
+  const addProductBtn = document.getElementById('add-product-btn');
+  
+  if (!addProductBtn) return;
+  
+  addProductBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.location.href = 'add-product.html';
+  });
+}
+
+// ==========================================================
 // VENDOR DASHBOARD
 // ==========================================================
 
@@ -464,87 +764,26 @@ function initVendorDashboard() {
   if (vendorNameEl) {
     vendorNameEl.textContent = vendor.name;
   }
-
-  // Add product button
-  const addBtn = document.getElementById('add-product-btn');
-  if (addBtn) {
-    addBtn.addEventListener('click', function() {
-      const name = prompt('Enter product name:');
-      if (!name) return;
-
-      const price = parseFloat(prompt('Enter price (R):'));
-      if (isNaN(price) || price <= 0) return;
-
-      const stock = parseInt(prompt('Enter stock quantity:'));
-      if (isNaN(stock) || stock < 0) return;
-
-      const newProduct = {
-        id: `p${Date.now()}`,
-        name: name,
-        price: price,
-        stock: stock
-      };
-
-      vendor.products.push(newProduct);
-      saveVendorData();
-
-      alert(`✅ Added "${name}" to your products!`);
-      window.location.reload();
-    });
-  }
 }
+
 // ==========================================================
-// VENDOR SWITCHER (for dashboard header)
+// VENDOR SWITCHER - REMOVED (no longer needed)
 // ==========================================================
 
-function initVendorSwitcher() {
-  const headerRight = document.querySelector('.header-right');
-  if (!headerRight) return;
+// function initVendorSwitcher() {
+//   // This function has been removed as requested
+// }
 
-  // Check if switcher already exists
-  if (document.querySelector('.vendor-switcher')) return;
+// ==========================================================
+// ABOUT PAGE
+// ==========================================================
 
-  // Only add switcher if we're on dashboard or about page
-  const isDashboard = document.querySelector('.orders-card');
-  const isAbout = document.querySelector('.about-hero');
+function initAboutPage() {
+  // Any about page specific functionality
+  const aboutHero = document.querySelector('.about-hero');
+  if (!aboutHero) return;
   
-  if (!isDashboard && !isAbout) return;
-
-  const switcher = document.createElement('select');
-  switcher.className = 'vendor-switcher';
-  switcher.style.cssText = `
-    background: var(--card);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-size: 12px;
-    cursor: pointer;
-    outline: none;
-  `;
-
-  const vendors = getVendorList();
-  vendors.forEach(name => {
-    const option = document.createElement('option');
-    option.value = name;
-    option.textContent = name;
-    if (name === currentVendor) {
-      option.selected = true;
-    }
-    switcher.appendChild(option);
-  });
-
-  switcher.addEventListener('change', function() {
-    switchVendor(this.value);
-  });
-
-  // Insert before the avatar
-  const avatar = headerRight.querySelector('.avatar');
-  if (avatar) {
-    headerRight.insertBefore(switcher, avatar);
-  } else {
-    headerRight.appendChild(switcher);
-  }
+  // You can add about page specific JS here
 }
 
 // ==========================================================
