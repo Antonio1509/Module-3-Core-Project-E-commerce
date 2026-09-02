@@ -160,8 +160,52 @@
       </a>
 
 
-      <!-- User avatar -->
-      <div class="avatar">TM</div>
+      <!-- User avatar + account history -->
+      <div class="avatar-wrap">
+        <div
+          class="avatar"
+          id="user-avatar"
+          tabindex="0"
+          role="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-label="Your account"
+        >TM</div>
+
+        <div class="avatar-panel" id="avatar-panel" hidden>
+          <div class="avatar-panel-header">Thandiwe Mokoena</div>
+
+          <div class="avatar-panel-section">
+            <div class="avatar-panel-section-head">
+              <span>Recent searches</span>
+              <button type="button" class="panel-clear" data-clear="searches">Clear</button>
+            </div>
+            <ul class="avatar-panel-list" id="recent-searches-list">
+              <li class="avatar-panel-empty">No recent searches.</li>
+            </ul>
+          </div>
+
+          <div class="avatar-panel-section">
+            <div class="avatar-panel-section-head">
+              <span>Recently viewed</span>
+              <button type="button" class="panel-clear" data-clear="viewed">Clear</button>
+            </div>
+            <ul class="avatar-panel-list" id="recently-viewed-list">
+              <li class="avatar-panel-empty">No products viewed yet.</li>
+            </ul>
+          </div>
+
+          <div class="avatar-panel-section">
+            <div class="avatar-panel-section-head">
+              <span>Vendors you follow</span>
+              <button type="button" class="panel-clear" data-clear="follows">Clear</button>
+            </div>
+            <ul class="avatar-panel-list" id="followed-vendors-list">
+              <li class="avatar-panel-empty">You're not following any vendors yet.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
     </div>
 
@@ -346,6 +390,9 @@
         data-vendor="Ouma's Kitchen"
         data-price="65"
         data-category="Food"
+        data-rating="4.8"
+        data-reviews="156"
+        data-description="Crisp-edged oat cookies sweetened with local honey and a hint of cinnamon. Baked in small batches every week — no preservatives, no shortcuts, just the way Ouma always made them."
       >
 
         <div class="product-photo" style="background: #8a6642; padding: 0; overflow: hidden;">
@@ -388,6 +435,9 @@
         data-vendor="Karoo Tea Co."
         data-price="45"
         data-category="Food"
+        data-rating="4.9"
+        data-reviews="203"
+        data-description="Sun-dried rooibos leaves harvested from the Cederberg region, naturally caffeine-free with a smooth, slightly sweet finish. Makes about 40 cups per 100g bag."
       >
 
         <div class="product-photo" style="background: #6f8f52; padding: 0; overflow: hidden;">
@@ -430,6 +480,9 @@
         data-vendor="Ma Rosa's Pantry"
         data-price="55"
         data-category="Food"
+        data-rating="4.7"
+        data-reviews="98"
+        data-description="Small-batch jam made with ripe Free State peaches and just enough sugar to let the fruit shine. No pectin, no additives — the way jam used to taste."
       >
 
         <div class="product-photo" style="background: #b8443f; padding: 0; overflow: hidden;">
@@ -472,6 +525,9 @@
         data-vendor="Nomvula Designs"
         data-price="450"
         data-category="Fashion"
+        data-rating="4.6"
+        data-reviews="41"
+        data-description="A tailored midi dress cut from authentic indigo shweshwe fabric, hand-stitched with reinforced seams. Made to order — please allow 5–7 days for stitching."
       >
 
         <div class="product-photo" style="background: #5a6ad0; padding: 0; overflow: hidden;">
@@ -514,6 +570,9 @@
         data-vendor="Kaross Footwear"
         data-price="290"
         data-category="Fashion"
+        data-rating="4.5"
+        data-reviews="67"
+        data-description="Full-grain leather sandals hand-cut and stitched by a small family workshop. Each pair is broken in slightly before shipping so they're comfortable from day one."
       >
 
         <div class="product-photo" style="background: #a9825a; padding: 0; overflow: hidden;">
@@ -556,6 +615,9 @@
         data-vendor="Amahle Threads"
         data-price="95"
         data-category="Fashion"
+        data-rating="4.8"
+        data-reviews="52"
+        data-description="A lightweight, breathable headwrap in a bold kente-inspired print. One size, hand-hemmed edges, long enough for multiple wrap styles."
       >
 
         <div class="product-photo" style="background: #d68a3c; padding: 0; overflow: hidden;">
@@ -598,6 +660,9 @@
         data-vendor="Naledi Naturals"
         data-price="120"
         data-category="Skincare"
+        data-rating="4.9"
+        data-reviews="312"
+        data-description="Unrefined shea butter whipped with jojoba oil and a touch of vanilla for a light, fast-absorbing finish. No parabens, no synthetic fragrance."
       >
 
         <div class="product-photo" style="background: #cbb98f; padding: 0; overflow: hidden;">
@@ -638,6 +703,9 @@
         data-vendor="Baraka Botanicals"
         data-price="48"
         data-category="Skincare"
+        data-rating="4.6"
+        data-reviews="88"
+        data-description="Traditional black soap made from sun-dried plantain skins and shea butter ash. Gentle enough for daily use, and a favourite for oily or acne-prone skin."
       >
 
         <div class="product-photo" style="background: #6b6b6b; padding: 0; overflow: hidden;">
@@ -680,6 +748,9 @@
         data-vendor="Naledi Naturals"
         data-price="35"
         data-category="Skincare"
+        data-rating="4.7"
+        data-reviews="145"
+        data-description="A pocket-sized lip balm made with rooibos extract, raw honey and beeswax. Lightly tinted with a faint honey scent — no plastic applicator waste."
       >
 
         <div class="product-photo" style="background: #d17a92; padding: 0; overflow: hidden;">
@@ -722,6 +793,9 @@
         data-vendor="Zanele Beadwork"
         data-price="385"
         data-category="Crafts"
+        data-rating="4.8"
+        data-reviews="74"
+        data-description="Hand-beaded panel woven onto a durable canvas tote. Every bag takes roughly six hours to bead by hand, so no two are exactly alike."
       >
 
         <div class="product-photo" style="background: #d3455a; padding: 0; overflow: hidden;">
@@ -764,6 +838,9 @@
         data-vendor="Studio Umuzi"
         data-price="220"
         data-category="Crafts"
+        data-rating="4.7"
+        data-reviews="39"
+        data-description="Wheel-thrown stoneware bowl, finished with a food-safe glaze in a warm speckled tone. Microwave and dishwasher safe."
       >
 
         <div class="product-photo" style="background: #c48b5e; padding: 0; overflow: hidden;">
@@ -806,6 +883,9 @@
         data-vendor="Kwazi Weaves"
         data-price="165"
         data-category="Crafts"
+        data-rating="4.9"
+        data-reviews="61"
+        data-description="A sturdy storage basket hand-woven from natural sisal fibre. Strong enough for laundry, light enough for everyday carrying."
       >
 
         <div class="product-photo" style="background: #c7a35c; padding: 0; overflow: hidden;">

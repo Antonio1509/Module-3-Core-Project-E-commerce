@@ -1,158 +1,430 @@
-/* ==========================================================
-   LOCALCART - COMPLETE FUNCTIONALITY
-   Includes: index.html, about.html, vendor-dashboard.html
-   With Avatar Panel - User History Feature
-========================================================== */
+/* ===========================================================
+   LocalCart — shared front-end script
+   Every init function checks for its target elements before
+   doing anything, so this one file can be safely included on
+   every page (index, about, contact, vendor-dashboard, ...)
+   without erroring on pages that don't have those elements.
 
-document.addEventListener("DOMContentLoaded", () => {
+   Cart + theme are persisted in localStorage since this is a
+   real multi-page site now (state needs to survive navigating
+   from index.html -> cart.html, etc.), not a single-page demo.
+   =========================================================== */
 
-  // Load data from localStorage
-  loadVendorData();
-
-  // Initialize all features
-  initThemeToggle();
-  initBrowseButton();
-  initNavigation();
-  initSearch();
-  initCategoryFilter();
-  initCart();
-  initVendorDashboard();
-  initAboutPage();
-  // initVendorSwitcher(); // REMOVED - No longer needed
-  initAvatarPanel();           // Avatar user history
-  initVendorFollowButtons();   // Follow buttons on products
-  initProductViewTracking();   // Track product views
-  initAddProductButton();      // Add product button navigation
-
-});
-
-// ==========================================================
-// VENDOR DATA STORE
-// ==========================================================
-
-const VENDOR_STORE_KEY = 'localcart_vendor_data';
-const CURRENT_VENDOR_KEY = 'localcart_current_vendor';
-
-// Default vendor data
-const defaultVendors = {
-  'Maya\'s Kitchen': {
-    id: 'vendor_001',
-    name: 'Maya\'s Kitchen',
-    sales: 4280,
-    orders: 38,
-    rating: 4.8,
-    products: [
-      { id: 'p1', name: 'Honey oat cookies', price: 85, stock: 24 },
-      { id: 'p2', name: 'Ginger snap box', price: 95, stock: 12 },
-      { id: 'p3', name: 'Chocolate chip cookies', price: 90, stock: 18 },
-      { id: 'p4', name: 'Almond biscotti', price: 110, stock: 8 }
-    ],
-    recentOrders: [
-      { id: '#LC-10482', item: 'Honey oat cookies x2', status: 'Packing', amount: 170.00 },
-      { id: '#LC-10475', item: 'Ginger snap box', status: 'Delivered', amount: 95.00 },
-      { id: '#LC-10461', item: 'Honey oat cookies x1', status: 'Delivered', amount: 85.00 }
-    ]
-  },
-  'The Spice Route': {
-    id: 'vendor_002',
-    name: 'The Spice Route',
-    sales: 3120,
-    orders: 27,
-    rating: 4.6,
-    products: [
-      { id: 'p5', name: 'Masala chai blend', price: 120, stock: 15 },
-      { id: 'p6', name: 'Turmeric powder', price: 80, stock: 30 },
-      { id: 'p7', name: 'Cinnamon sticks', price: 65, stock: 22 }
-    ],
-    recentOrders: [
-      { id: '#LC-10490', item: 'Masala chai blend x1', status: 'Packing', amount: 120.00 },
-      { id: '#LC-10485', item: 'Turmeric powder x2', status: 'Delivered', amount: 160.00 }
-    ]
-  },
-  'Craft & Co': {
-    id: 'vendor_003',
-    name: 'Craft & Co',
-    sales: 2560,
-    orders: 19,
-    rating: 4.9,
-    products: [
-      { id: 'p8', name: 'Handmade candles', price: 150, stock: 10 },
-      { id: 'p9', name: 'Leather journals', price: 200, stock: 6 },
-      { id: 'p10', name: 'Macrame plant hangers', price: 130, stock: 8 }
-    ],
-    recentOrders: [
-      { id: '#LC-10495', item: 'Handmade candles x1', status: 'Packing', amount: 150.00 },
-      { id: '#LC-10488', item: 'Leather journals x1', status: 'Delivered', amount: 200.00 }
-    ]
-  },
-  'Fresh Harvest': {
-    id: 'vendor_004',
-    name: 'Fresh Harvest',
-    sales: 1840,
-    orders: 14,
-    rating: 4.4,
-    products: [
-      { id: 'p11', name: 'Organic honey', price: 95, stock: 20 },
-      { id: 'p12', name: 'Artisanal jam set', price: 120, stock: 12 }
-    ],
-    recentOrders: [
-      { id: '#LC-10498', item: 'Organic honey x2', status: 'Packing', amount: 190.00 },
-      { id: '#LC-10492', item: 'Artisanal jam set x1', status: 'Delivered', amount: 120.00 }
-    ]
-  }
-};
-
-let vendorData = {};
-let currentVendor = 'Maya\'s Kitchen';
-
-function loadVendorData() {
-  try {
-    const stored = localStorage.getItem(VENDOR_STORE_KEY);
-    if (stored) {
-      vendorData = JSON.parse(stored);
-    } else {
-      vendorData = JSON.parse(JSON.stringify(defaultVendors));
-      localStorage.setItem(VENDOR_STORE_KEY, JSON.stringify(vendorData));
-    }
-
-    const current = localStorage.getItem(CURRENT_VENDOR_KEY);
-    if (current && vendorData[current]) {
-      currentVendor = current;
-    }
-  } catch (e) {
-    console.warn('Failed to load vendor data:', e);
-    vendorData = JSON.parse(JSON.stringify(defaultVendors));
-  }
-}
-
-function saveVendorData() {
-  try {
-    localStorage.setItem(VENDOR_STORE_KEY, JSON.stringify(vendorData));
-    localStorage.setItem(CURRENT_VENDOR_KEY, currentVendor);
-  } catch (e) {
-    console.warn('Failed to save vendor data:', e);
-  }
-}
-
-function getVendorList() {
-  return Object.keys(vendorData);
-}
-
-function switchVendor(vendorName) {
-  if (vendorData[vendorName]) {
-    currentVendor = vendorName;
-    saveVendorData();
-    window.location.reload();
-  }
-}
-
-// ==========================================================
-// AVATAR PANEL - USER HISTORY
-// ==========================================================
-
+const CART_KEY = 'localcart_cart_v1';
+const THEME_KEY = 'localcart_theme';
 const SEARCH_HISTORY_KEY = 'localcart_recent_searches';
 const VIEWED_KEY = 'localcart_recently_viewed';
 const FOLLOWED_KEY = 'localcart_followed_vendors';
+
+document.addEventListener('DOMContentLoaded', () => {
+  initThemeToggle();
+  initBrowseButton();
+  initSearch();
+  initCategoryFilter();
+  initAddToCart();
+  renderCartBadge();
+  initVendorDashboard();
+  initContactForm();
+  initVendorFollowButtons();
+  initProductViewTracking();
+  initAvatarPanel();
+  initProductModal();
+});
+
+/* ---------------------------------------------------------
+   Theme toggle — persisted across pages via localStorage,
+   falls back to system preference on first visit.
+--------------------------------------------------------- */
+function initThemeToggle() {
+  const root = document.documentElement;
+  const toggle = document.getElementById('theme-toggle');
+
+  let stored = null;
+  try { stored = localStorage.getItem(THEME_KEY); } catch (e) { /* ignore */ }
+
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  root.setAttribute('data-theme', stored || (prefersLight ? 'light' : 'dark'));
+
+  if (!toggle) return;
+
+  toggle.addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* ignore */ }
+  });
+}
+
+/* ---------------------------------------------------------
+   "Browse products" hero button — smooth-scrolls to the
+   Featured products grid, only present on the shop page.
+--------------------------------------------------------- */
+function initBrowseButton() {
+  const browseBtn = document.getElementById('browse-btn') || document.getElementById('browse-products');
+  const productsGrid = document.getElementById('products-grid');
+  if (!browseBtn || !productsGrid) return;
+
+  browseBtn.addEventListener('click', () => {
+    productsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+/* ---------------------------------------------------------
+   Search box — two modes:
+   - On the shop page (has #products-grid): filters product
+     cards live as you type, combined with any active category.
+   - On every other page: pressing Enter redirects to
+     index.html?q=<term> so search works from anywhere on the site.
+   Also reads ?q= on the shop page itself so a search that
+   redirected here pre-fills and applies automatically.
+--------------------------------------------------------- */
+function initSearch() {
+  const input = document.getElementById('search-input');
+  if (!input) return;
+
+  const productsGrid = document.getElementById('products-grid');
+
+  if (!productsGrid) {
+    // Not the shop page — Enter redirects to the shop with the query.
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const term = input.value.trim();
+      if (term) recordSearch(term);
+      window.location.href = term ? `index.html?q=${encodeURIComponent(term)}` : 'index.html';
+    });
+    return;
+  }
+
+  // Shop page: live filtering.
+  const state = { searchTerm: '', activeCategory: null };
+
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get('q');
+  if (q) {
+    input.value = q;
+    state.searchTerm = q.trim().toLowerCase();
+    recordSearch(q.trim());
+  }
+
+  input.addEventListener('input', () => {
+    state.searchTerm = input.value.trim().toLowerCase();
+    applyFilters(state);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    const term = input.value.trim();
+    if (term) recordSearch(term);
+  });
+
+  // Expose so initCategoryFilter (defined separately) can share the same state.
+  window.__localcartFilterState = state;
+  applyFilters(state);
+}
+
+/* ---------------------------------------------------------
+   Category filter — click a category card to filter the
+   Featured products grid; click again to clear it.
+--------------------------------------------------------- */
+function initCategoryFilter() {
+  const categoryCards = document.querySelectorAll('.category-card');
+  const productsGrid = document.getElementById('products-grid');
+  if (!categoryCards.length || !productsGrid) return;
+
+  const state = window.__localcartFilterState || { searchTerm: '', activeCategory: null };
+  window.__localcartFilterState = state;
+
+  categoryCards.forEach((card) => {
+    if (!card.hasAttribute('tabindex')) card.setAttribute('tabindex', '0');
+    if (!card.hasAttribute('role')) card.setAttribute('role', 'button');
+
+    const activate = () => {
+      const category = card.dataset.category;
+      if (!category) return; // card not wired for filtering
+      const alreadyActive = card.classList.contains('active');
+
+      categoryCards.forEach((c) => c.classList.remove('active'));
+
+      state.activeCategory = alreadyActive ? null : category;
+      if (!alreadyActive) card.classList.add('active');
+
+      applyFilters(state);
+      productsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    card.addEventListener('click', activate);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activate();
+      }
+    });
+  });
+}
+
+function applyFilters(state) {
+  const cards = Array.from(document.querySelectorAll('.product-card'));
+  const emptyState = document.getElementById('empty-state');
+  let visibleCount = 0;
+
+  cards.forEach((card) => {
+    const matchesCategory = !state.activeCategory || card.dataset.category === state.activeCategory;
+    const haystack = `${card.dataset.name || ''} ${card.dataset.vendor || ''}`.toLowerCase();
+    const matchesSearch = !state.searchTerm || haystack.includes(state.searchTerm);
+    const visible = matchesCategory && matchesSearch;
+
+    card.style.display = visible ? '' : 'none';
+    if (visible) visibleCount += 1;
+  });
+
+  if (emptyState) emptyState.hidden = visibleCount !== 0 || cards.length === 0;
+}
+
+/* ---------------------------------------------------------
+   Cart — persisted in localStorage so it survives navigating
+   between pages (index.html -> cart.html, etc).
+--------------------------------------------------------- */
+function getCart() {
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCart(items) {
+  try { localStorage.setItem(CART_KEY, JSON.stringify(items)); } catch (e) { /* ignore */ }
+}
+
+function addToCart(name, vendor, price) {
+  const items = getCart();
+  const existing = items.find((i) => i.name === name && i.vendor === vendor);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    items.push({ name, vendor, price, qty: 1 });
+  }
+  saveCart(items);
+  renderCartBadge();
+}
+
+function renderCartBadge() {
+  const badge = document.getElementById('cart-count');
+  if (!badge) return;
+  const totalQty = getCart().reduce((sum, item) => sum + item.qty, 0);
+  badge.textContent = String(totalQty);
+  if (badge.hasAttribute('hidden') || badge.hidden !== undefined) {
+    badge.hidden = totalQty === 0 && badge.dataset.hideWhenEmpty === 'true';
+  }
+}
+
+function initAddToCart() {
+  document.querySelectorAll('.product-card').forEach((card) => {
+    const btn = card.querySelector('.btn-add-cart');
+    if (!btn) return;
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const name = card.dataset.name;
+      const vendor = card.dataset.vendor;
+      const price = parseFloat(card.dataset.price);
+      if (!name || Number.isNaN(price)) return;
+
+      addToCart(name, vendor, price);
+
+      const originalText = btn.textContent;
+      btn.textContent = 'Added ✓';
+      btn.classList.add('added');
+      btn.disabled = true;
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.classList.remove('added');
+        btn.disabled = false;
+      }, 900);
+    });
+  });
+}
+
+/* ===========================================================
+   Vendor dashboard — client-side vendor switcher.
+   No backend yet, so "logging in as a different vendor" is
+   simulated: picking a vendor from the dropdown swaps the
+   welcome text, avatar, stats and recent-orders table using
+   the sample data below.
+   =========================================================== */
+const VENDORS = {
+  maya: {
+    name: "Maya's Kitchen",
+    initial: 'M',
+    sales: 'R4,280',
+    orders: 38,
+    rating: '4.8',
+    recentOrders: [
+      { id: '#LC-10482', item: 'Honey oat cookies x2', status: 'packing', amount: 'R170.00' },
+      { id: '#LC-10475', item: 'Ginger snap box', status: 'delivered', amount: 'R95.00' },
+      { id: '#LC-10461', item: 'Honey oat cookies x1', status: 'delivered', amount: 'R85.00' },
+    ],
+  },
+  naledi: {
+    name: 'Naledi Naturals',
+    initial: 'N',
+    sales: 'R6,150',
+    orders: 52,
+    rating: '4.9',
+    recentOrders: [
+      { id: '#LC-10490', item: 'Whipped Shea Body Butter x3', status: 'delivered', amount: 'R360.00' },
+      { id: '#LC-10488', item: 'Rooibos & Honey Lip Balm x2', status: 'packing', amount: 'R70.00' },
+      { id: '#LC-10479', item: 'Whipped Shea Body Butter x1', status: 'delivered', amount: 'R120.00' },
+    ],
+  },
+  zanele: {
+    name: 'Zanele Beadwork',
+    initial: 'Z',
+    sales: 'R2,940',
+    orders: 14,
+    rating: '4.6',
+    recentOrders: [
+      { id: '#LC-10471', item: 'Beaded Woven Tote Bag', status: 'delivered', amount: 'R385.00' },
+      { id: '#LC-10466', item: 'Beaded Earrings Set', status: 'packing', amount: 'R140.00' },
+      { id: '#LC-10450', item: 'Beaded Woven Tote Bag', status: 'delivered', amount: 'R385.00' },
+    ],
+  },
+};
+
+function initVendorDashboard() {
+  const select = document.getElementById('vendor-switch');
+  if (!select) return; // not on the vendor dashboard page
+
+  const welcome = document.getElementById('dash-welcome');
+  const vendorNameEl = document.getElementById('dash-vendor-name');
+  const avatarEl = document.getElementById('dash-avatar');
+  const salesEl = document.getElementById('stat-sales');
+  const ordersEl = document.getElementById('stat-orders');
+  const ratingEl = document.getElementById('stat-rating-value');
+  const tbody = document.getElementById('orders-tbody');
+
+  function renderVendor(key) {
+    const v = VENDORS[key];
+    if (!v) return;
+
+    if (welcome) welcome.textContent = `Welcome back, ${v.name}`;
+    if (vendorNameEl) vendorNameEl.textContent = v.name;
+    if (avatarEl) avatarEl.textContent = v.initial;
+    if (salesEl) salesEl.textContent = v.sales;
+    if (ordersEl) ordersEl.textContent = String(v.orders);
+    if (ratingEl) ratingEl.textContent = v.rating;
+
+    if (tbody) {
+      tbody.innerHTML = '';
+      v.recentOrders.forEach((o) => {
+        const tr = document.createElement('tr');
+        const isDelivered = o.status === 'delivered';
+        tr.innerHTML = `
+          <td class="order-id">${o.id}</td>
+          <td>${o.item}</td>
+          <td><span class="status-pill ${isDelivered ? 'status-delivered' : 'status-packing'}">${isDelivered ? 'Delivered' : 'Packing'}</span></td>
+          <td class="num amount">${o.amount}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+  }
+
+  select.addEventListener('change', () => renderVendor(select.value));
+  renderVendor(select.value);
+}
+
+/* ---------------------------------------------------------
+   Contact form — client-side validation + a simulated submit
+   (there's no backend yet). Shows inline field errors and a
+   success message, then resets the form.
+--------------------------------------------------------- */
+function initContactForm() {
+  const form = document.getElementById('contact-form');
+  if (!form) return;
+
+  const successBox = document.getElementById('form-success');
+  const submitBtn = form.querySelector('button[type="submit"]');
+
+  const fields = {
+    name: form.querySelector('#contact-name'),
+    email: form.querySelector('#contact-email'),
+    topic: form.querySelector('#contact-topic'),
+    message: form.querySelector('#contact-message'),
+  };
+
+  function setError(fieldKey, show) {
+    const field = fields[fieldKey];
+    if (!field) return;
+    const group = field.closest('.form-group');
+    if (group) group.classList.toggle('invalid', show);
+  }
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  }
+
+  function validate() {
+    let valid = true;
+
+    if (!fields.name.value.trim()) {
+      setError('name', true);
+      valid = false;
+    } else {
+      setError('name', false);
+    }
+
+    if (!isValidEmail(fields.email.value.trim())) {
+      setError('email', true);
+      valid = false;
+    } else {
+      setError('email', false);
+    }
+
+    if (!fields.message.value.trim()) {
+      setError('message', true);
+      valid = false;
+    } else {
+      setError('message', false);
+    }
+
+    return valid;
+  }
+
+  // Clear a field's error state as soon as the person fixes it.
+  Object.keys(fields).forEach((key) => {
+    const field = fields[key];
+    if (!field) return;
+    field.addEventListener('input', () => setError(key, false));
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (successBox) successBox.classList.remove('visible');
+
+    if (!validate()) return;
+
+    // No backend yet — simulate a network round-trip, then confirm.
+    submitBtn.disabled = true;
+    const originalLabel = submitBtn.textContent;
+    submitBtn.textContent = 'Sending…';
+
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalLabel;
+      form.reset();
+      if (successBox) successBox.classList.add('visible');
+    }, 600);
+  });
+}
+
+/* ===========================================================
+   Account history — recent searches, recently viewed products,
+   and followed vendors. Everything here is genuinely tracked
+   from real interactions (not placeholder data) and stored in
+   localStorage, since there's no backend/auth yet.
+   =========================================================== */
 
 function getList(key) {
   try {
@@ -197,6 +469,66 @@ function toggleFollow(vendor) {
   return list.includes(vendor);
 }
 
+/* ---------------------------------------------------------
+   Tracks "recently viewed" whenever a product card is clicked
+   (anywhere other than its Add to cart button, which already
+   stops propagation on its own click handler).
+--------------------------------------------------------- */
+function initProductViewTracking() {
+  document.querySelectorAll('.product-card').forEach((card) => {
+    card.addEventListener('click', () => {
+      if (card.dataset.name) recordViewed(card.dataset.name, card.dataset.vendor || '');
+    });
+  });
+}
+
+/* ---------------------------------------------------------
+   Injects a small follow-toggle star into every product card's
+   vendor label, so "vendors you follow" reflects real clicks
+   without requiring any HTML changes on existing pages.
+--------------------------------------------------------- */
+const FOLLOW_ICON_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+
+function initVendorFollowButtons() {
+  document.querySelectorAll('.product-vendor').forEach((el) => {
+    if (el.querySelector('.follow-toggle')) return; // already injected
+    const vendorName = el.textContent.trim();
+    if (!vendorName) return;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'follow-toggle';
+    btn.dataset.vendor = vendorName;
+    btn.setAttribute('aria-label', `Follow ${vendorName}`);
+    btn.innerHTML = FOLLOW_ICON_SVG;
+    if (isFollowing(vendorName)) btn.classList.add('following');
+
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation(); // don't also record this as a "product viewed" click
+      const nowFollowing = toggleFollow(vendorName);
+      btn.classList.toggle('following', nowFollowing);
+      if (typeof window.__localcartRenderAvatarPanel === 'function') {
+        window.__localcartRenderAvatarPanel();
+      }
+    });
+
+    el.appendChild(btn);
+  });
+}
+
+function syncFollowButtons() {
+  document.querySelectorAll('.follow-toggle').forEach((btn) => {
+    btn.classList.toggle('following', isFollowing(btn.dataset.vendor));
+  });
+}
+
+/* ---------------------------------------------------------
+   Avatar account panel — click the avatar (id="user-avatar")
+   to see recent searches, recently viewed products, and
+   followed vendors. Deliberately scoped to #user-avatar only,
+   so it never attaches to the vendor dashboard's own avatar
+   (#dash-avatar), which represents a different persona.
+--------------------------------------------------------- */
 function initAvatarPanel() {
   const avatar = document.getElementById('user-avatar');
   const panel = document.getElementById('avatar-panel');
@@ -263,37 +595,15 @@ function initAvatarPanel() {
         renderPanel();
       },
     }));
-
-    // Update badge count
-    updateAvatarBadge();
-  }
-
-  function updateAvatarBadge() {
-    const badge = document.getElementById('avatar-badge');
-    if (!badge) return;
-    const searches = getList(SEARCH_HISTORY_KEY).length;
-    const viewed = getList(VIEWED_KEY).length;
-    const follows = getList(FOLLOWED_KEY).length;
-    const total = searches + viewed + follows;
-    badge.textContent = total;
-    badge.hidden = total === 0;
-  }
-
-  function syncFollowButtons() {
-    document.querySelectorAll('.follow-toggle').forEach((btn) => {
-      btn.classList.toggle('following', isFollowing(btn.dataset.vendor));
-    });
   }
 
   window.__localcartRenderAvatarPanel = renderPanel;
-  window.__localcartSyncFollowButtons = syncFollowButtons;
 
   function openPanel() {
     panel.hidden = false;
     avatar.setAttribute('aria-expanded', 'true');
     renderPanel();
   }
-
   function closePanel() {
     panel.hidden = true;
     avatar.setAttribute('aria-expanded', 'false');
@@ -302,7 +612,6 @@ function initAvatarPanel() {
   avatar.addEventListener('click', () => {
     if (panel.hidden) openPanel(); else closePanel();
   });
-
   avatar.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -332,591 +641,148 @@ function initAvatarPanel() {
     }
     renderPanel();
   });
-
-  // Initial badge update
-  updateAvatarBadge();
-
-  // Keyboard shortcut: Press 'A' to toggle avatar panel
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'a' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      const activeElement = document.activeElement;
-      if (activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(activeElement.tagName)) return;
-      e.preventDefault();
-      if (panel.hidden) openPanel(); else closePanel();
-    }
-  });
 }
 
-// ==========================================================
-// VENDOR FOLLOW BUTTONS ON PRODUCTS
-// ==========================================================
+/* ===========================================================
+   Product detail modal — clicking a product card (anywhere
+   except its Add to cart button or the vendor follow star,
+   both of which already stop propagation) opens a modal with
+   the image, rating, description and price, pulled straight
+   from that card's data-* attributes. No HTML changes needed
+   on existing pages — the modal markup is injected once here.
+   =========================================================== */
 
-function initVendorFollowButtons() {
-  document.querySelectorAll('.product-vendor').forEach((el) => {
-    if (el.querySelector('.follow-toggle')) return;
-    const vendorName = el.textContent.trim();
-    if (!vendorName) return;
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'follow-toggle';
-    btn.dataset.vendor = vendorName;
-    btn.setAttribute('aria-label', `Follow ${vendorName}`);
-    btn.innerHTML = '☆';
-    btn.style.cssText = `
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      padding: 0 4px;
-      color: var(--text, #333);
-      transition: color 0.2s;
-      margin-left: 4px;
-    `;
-    
-    if (isFollowing(vendorName)) {
-      btn.classList.add('following');
-      btn.innerHTML = '★';
-      btn.style.color = '#f5a623';
-    }
-
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const nowFollowing = toggleFollow(vendorName);
-      btn.classList.toggle('following', nowFollowing);
-      btn.innerHTML = nowFollowing ? '★' : '☆';
-      btn.style.color = nowFollowing ? '#f5a623' : '';
-      if (typeof window.__localcartRenderAvatarPanel === 'function') {
-        window.__localcartRenderAvatarPanel();
-      }
-    });
-
-    el.appendChild(btn);
-  });
-}
-
-// ==========================================================
-// PRODUCT VIEW TRACKING
-// ==========================================================
-
-function initProductViewTracking() {
-  document.querySelectorAll('.product-card').forEach((card) => {
-    // Only track if not already tracked
-    if (card.dataset.viewTracked) return;
-    card.dataset.viewTracked = 'true';
-    
-    card.addEventListener('click', (e) => {
-      // Don't track if clicked on add-to-cart button or follow button
-      if (e.target.closest('.btn-add-cart') || e.target.closest('.follow-toggle')) return;
-      if (card.dataset.name) {
-        recordViewed(card.dataset.name, card.dataset.vendor || '');
-        if (typeof window.__localcartRenderAvatarPanel === 'function') {
-          window.__localcartRenderAvatarPanel();
-        }
-      }
-    });
-  });
-}
-
-// ==========================================================
-// THEME TOGGLE
-// ==========================================================
-
-function initThemeToggle() {
-  const root = document.documentElement;
-  const toggle = document.getElementById("theme-toggle");
-
-  if (!toggle) return;
-
-  // Check if user already selected a theme
-  const savedTheme = localStorage.getItem("localcart-theme");
-
-  if (savedTheme) {
-    root.setAttribute("data-theme", savedTheme);
-  } else {
-    // Otherwise use system preference
-    const prefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
-    root.setAttribute("data-theme", prefersLight ? "light" : "dark");
-  }
-
-  // Change theme when clicked
-  toggle.addEventListener("click", () => {
-    const currentTheme = root.getAttribute("data-theme");
-    const nextTheme = currentTheme === "dark" ? "light" : "dark";
-
-    root.setAttribute("data-theme", nextTheme);
-    localStorage.setItem("localcart-theme", nextTheme);
-  });
-}
-
-// ==========================================================
-// BROWSE PRODUCTS BUTTON
-// ==========================================================
-
-function initBrowseButton() {
-  const browseButton = document.getElementById("browse-products");
-  const productsSection = document.getElementById("products-grid");
-
-  if (!browseButton || !productsSection) return;
-
-  browseButton.addEventListener("click", () => {
-    productsSection.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  });
-}
-
-// ==========================================================
-// NAVIGATION
-// ==========================================================
-
-function initNavigation() {
-  const navLinks = document.querySelectorAll("header nav a");
-
-  navLinks.forEach((link) => {
-    link.addEventListener("click", () => {
-      // Remove active class from all links
-      navLinks.forEach((item) => {
-        item.classList.remove("active");
-      });
-
-      // Add active class to clicked link
-      link.classList.add("active");
-    });
-  });
-}
-
-// ==========================================================
-// SEARCH
-// ==========================================================
-
-function initSearch() {
-  const searchInput = document.getElementById("search-input");
-
-  if (!searchInput) return;
-
-  searchInput.addEventListener("input", () => {
-    applyFilters();
-  });
-
-  // Record searches when Enter is pressed
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const term = searchInput.value.trim();
-      if (term) recordSearch(term);
-    }
-  });
-}
-
-// ==========================================================
-// CATEGORY FILTER
-// ==========================================================
-
-function initCategoryFilter() {
-  const categoryCards = document.querySelectorAll(".category-card");
-
-  categoryCards.forEach((card) => {
-    // Click
-    card.addEventListener("click", () => {
-      toggleCategory(card);
-    });
-
-    // Keyboard accessibility
-    card.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        toggleCategory(card);
-      }
-    });
-  });
-}
-
-// ==========================================================
-// TOGGLE CATEGORY
-// ==========================================================
-
-function toggleCategory(card) {
-  const category = card.dataset.category;
-  const alreadyActive = card.classList.contains("active");
-
-  // Remove active from every category
-  document.querySelectorAll(".category-card").forEach((item) => {
-    item.classList.remove("active");
-  });
-
-  // If it wasn't active, activate it
-  if (!alreadyActive) {
-    card.classList.add("active");
-  }
-
-  // Apply category filter
-  applyFilters();
-
-  // Scroll to products
-  const productsSection = document.getElementById("products-grid");
-
-  if (productsSection) {
-    productsSection.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  }
-}
-
-// ==========================================================
-// FILTER PRODUCTS
-// ==========================================================
-
-function applyFilters() {
-  const searchInput = document.getElementById("search-input");
-
-  const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : "";
-
-  // Find active category
-  const activeCategoryCard = document.querySelector(".category-card.active");
-  const activeCategory = activeCategoryCard ? activeCategoryCard.dataset.category : null;
-
-  // Find products
-  const productCards = document.querySelectorAll(".product-card");
-
-  let visibleProducts = 0;
-
-  productCards.forEach((card) => {
-    const name = card.dataset.name ? card.dataset.name.toLowerCase() : "";
-    const vendor = card.dataset.vendor ? card.dataset.vendor.toLowerCase() : "";
-    const category = card.dataset.category ? card.dataset.category : "";
-
-    // Search matching
-    const matchesSearch = searchTerm === "" || name.includes(searchTerm) || vendor.includes(searchTerm);
-
-    // Category matching
-    const matchesCategory = !activeCategory || category === activeCategory;
-
-    // Final result
-    const shouldShow = matchesSearch && matchesCategory;
-
-    card.style.display = shouldShow ? "" : "none";
-
-    if (shouldShow) {
-      visibleProducts++;
-    }
-  });
-
-  // Empty state
-  const emptyState = document.getElementById("empty-state");
-
-  if (emptyState) {
-    emptyState.hidden = visibleProducts !== 0;
-  }
-}
-
-// ==========================================================
-// SHOPPING CART
-// ==========================================================
-
-function initCart() {
-  const cartCount = document.getElementById("cart-count");
-  const addButtons = document.querySelectorAll(".btn-add-cart");
-
-  // Get existing cart from LocalStorage
-  let cart = JSON.parse(localStorage.getItem("localcart-cart")) || [];
-
-  /* --------------------------------------------------------
-     Save cart
-  -------------------------------------------------------- */
-  function saveCart() {
-    localStorage.setItem("localcart-cart", JSON.stringify(cart));
-  }
-
-  /* --------------------------------------------------------
-     Update cart number
-  -------------------------------------------------------- */
-  function updateCartCount() {
-    const totalQuantity = cart.reduce((total, item) => total + item.quantity, 0);
-
-    if (cartCount) {
-      cartCount.textContent = totalQuantity;
-      cartCount.hidden = totalQuantity === 0;
-    }
-  }
-
-  /* --------------------------------------------------------
-     Add product
-  -------------------------------------------------------- */
-  function addToCart(product) {
-    const existingProduct = cart.find(
-      (item) => item.name === product.name && item.vendor === product.vendor
-    );
-
-    if (existingProduct) {
-      existingProduct.quantity += 1;
+function buildStarRating(rating) {
+  const rounded = Math.round(rating * 2) / 2; // nearest 0.5
+  let starsHtml = '';
+  for (let i = 1; i <= 5; i += 1) {
+    if (rounded >= i) {
+      starsHtml += '<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+    } else if (rounded >= i - 0.5) {
+      starsHtml += '<svg width="15" height="15" viewBox="0 0 24 24"><defs><clipPath id="half-star-clip"><rect x="0" y="0" width="12" height="24"></rect></clipPath></defs><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="none" stroke="currentColor" stroke-width="1.6"></polygon><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="currentColor" clip-path="url(#half-star-clip)"></polygon></svg>';
     } else {
-      cart.push({
-        name: product.name,
-        vendor: product.vendor,
-        price: product.price,
-        quantity: 1
-      });
+      starsHtml += '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
     }
-
-    saveCart();
-    updateCartCount();
   }
-
-  /* --------------------------------------------------------
-     Add button events
-  -------------------------------------------------------- */
-  addButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const productCard = button.closest(".product-card");
-
-      if (!productCard) return;
-
-      const product = {
-        name: productCard.dataset.name,
-        vendor: productCard.dataset.vendor,
-        price: Number(productCard.dataset.price)
-      };
-
-      addToCart(product);
-
-      // Visual feedback
-      const originalText = button.textContent;
-      button.textContent = "Added ✓";
-      button.disabled = true;
-
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.disabled = false;
-      }, 900);
-    });
-  });
-
-  // Initial cart count
-  updateCartCount();
+  return starsHtml;
 }
 
-// ==========================================================
-// ADD PRODUCT BUTTON NAVIGATION
-// ==========================================================
+function ensureProductModal() {
+  let modal = document.getElementById('product-modal');
+  if (modal) return modal;
 
-function initAddProductButton() {
-  const addProductBtn = document.getElementById('add-product-btn');
-  
-  if (!addProductBtn) return;
-  
-  addProductBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    window.location.href = 'add-product.html';
-  });
-}
-
-// ==========================================================
-// VENDOR DASHBOARD
-// ==========================================================
-
-function initVendorDashboard() {
-  // Check if we're on vendor-dashboard.html
-  const isDashboard = document.querySelector('.orders-card') || document.querySelector('.page-head h1');
-  if (!isDashboard) return;
-
-  const vendor = vendorData[currentVendor];
-  if (!vendor) return;
-
-  // Update greeting
-  const greetEl = document.querySelector('.page-head h1');
-  if (greetEl) {
-    greetEl.textContent = `Welcome back, ${vendor.name}`;
-  }
-
-  // Update stats
-  const statValues = document.querySelectorAll('.stat-value');
-  if (statValues.length >= 3) {
-    statValues[0].textContent = `R${vendor.sales.toLocaleString()}`;
-    statValues[1].textContent = vendor.orders;
-    statValues[2].textContent = vendor.rating;
-  }
-
-  // Update orders table
-  const tbody = document.querySelector('.orders-card tbody');
-  if (tbody && vendor.recentOrders) {
-    tbody.innerHTML = vendor.recentOrders.map(order => `
-      <tr>
-        <td class="order-id">${order.id}</td>
-        <td>${order.item}</td>
-        <td><span class="status-pill ${order.status === 'Packing' ? 'status-packing' : 'status-delivered'}">${order.status}</span></td>
-        <td class="num amount">R${order.amount.toFixed(2)}</td>
-      </tr>
-    `).join('');
-  }
-
-  // Update avatar
-  const avatar = document.querySelector('.avatar');
-  if (avatar) {
-    const nameParts = vendor.name.split(' ');
-    const initials = nameParts.map(p => p[0]).join('');
-    avatar.textContent = initials;
-  }
-
-  // Update vendor name in header
-  const vendorNameEl = document.querySelector('.vendor-name');
-  if (vendorNameEl) {
-    vendorNameEl.textContent = vendor.name;
-  }
-}
-
-// ==========================================================
-// VENDOR SWITCHER - REMOVED (no longer needed)
-// ==========================================================
-
-// function initVendorSwitcher() {
-//   // This function has been removed as requested
-// }
-
-// ==========================================================
-// ABOUT PAGE
-// ==========================================================
-
-function initAboutPage() {
-  // Any about page specific functionality
-  const aboutHero = document.querySelector('.about-hero');
-  if (!aboutHero) return;
-  
-  // You can add about page specific JS here
-}
-
-// ==========================================================
-// INITIAL PRODUCT FILTER
-// ==========================================================
-
-// Run filter after page loads
-setTimeout(() => {
-  applyFilters();
-}, 100);
-
-// ==========================================================
-// CART PAGE FUNCTIONALITY (if on cart.html)
-// ==========================================================
-
-// This runs if cart.html exists
-document.addEventListener('DOMContentLoaded', function() {
-  const cartContainer = document.querySelector('.cart-items');
-  const totalEl = document.querySelector('.cart-total');
-
-  if (!cartContainer) return;
-
-  function renderCart() {
-    let cart = JSON.parse(localStorage.getItem("localcart-cart")) || [];
-
-    if (cart.length === 0) {
-      cartContainer.innerHTML = `<p class="empty-cart">Your cart is empty. <a href="index.html">Start shopping</a></p>`;
-      if (totalEl) totalEl.textContent = 'R0.00';
-      return;
-    }
-
-    cartContainer.innerHTML = cart.map((item, index) => `
-      <div class="cart-item" data-index="${index}">
-        <span>${item.name}</span>
-        <span>R${item.price.toFixed(2)}</span>
-        <div class="qty-controls">
-          <button class="qty-btn minus" data-index="${index}">−</button>
-          <span class="qty-num">${item.quantity}</span>
-          <button class="qty-btn plus" data-index="${index}">+</button>
-        </div>
-        <span>R${(item.price * item.quantity).toFixed(2)}</span>
-        <button class="remove-item" data-index="${index}">✕</button>
+  modal = document.createElement('div');
+  modal.id = 'product-modal';
+  modal.className = 'product-modal';
+  modal.hidden = true;
+  modal.innerHTML = `
+    <div class="product-modal-backdrop" data-modal-close="true"></div>
+    <div class="product-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+      <button type="button" class="product-modal-close" data-modal-close="true" aria-label="Close">&times;</button>
+      <div class="product-modal-media" id="product-modal-media"></div>
+      <div class="product-modal-body">
+        <span class="category-pill" id="product-modal-category"></span>
+        <div class="product-modal-vendor" id="product-modal-vendor"></div>
+        <h2 class="product-modal-title" id="product-modal-title"></h2>
+        <div class="product-modal-rating" id="product-modal-rating"></div>
+        <div class="product-modal-price" id="product-modal-price"></div>
+        <p class="product-modal-description" id="product-modal-description"></p>
+        <button class="btn-primary product-modal-add" id="product-modal-add" type="button">Add to cart</button>
       </div>
-    `).join('');
+    </div>
+  `;
+  document.body.appendChild(modal);
+  return modal;
+}
 
-    // Update total
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    if (totalEl) {
-      totalEl.textContent = `R${total.toFixed(2)}`;
+function initProductModal() {
+  const cards = document.querySelectorAll('.product-card');
+  if (!cards.length) return;
+
+  const modal = ensureProductModal();
+  const media = modal.querySelector('#product-modal-media');
+  const categoryEl = modal.querySelector('#product-modal-category');
+  const vendorEl = modal.querySelector('#product-modal-vendor');
+  const titleEl = modal.querySelector('#product-modal-title');
+  const ratingEl = modal.querySelector('#product-modal-rating');
+  const priceEl = modal.querySelector('#product-modal-price');
+  const descEl = modal.querySelector('#product-modal-description');
+  const addBtn = modal.querySelector('#product-modal-add');
+
+  let activeCard = null;
+
+  function openModal(card) {
+    activeCard = card;
+
+    const name = card.dataset.name || '';
+    const vendor = card.dataset.vendor || '';
+    const category = card.dataset.category || '';
+    const price = parseFloat(card.dataset.price);
+    const rating = parseFloat(card.dataset.rating);
+    const reviews = card.dataset.reviews;
+    const description = card.dataset.description || 'No description provided for this product yet.';
+
+    const img = card.querySelector('.product-photo img');
+    media.innerHTML = img
+      ? `<img src="${img.src}" alt="${name}">`
+      : `<div class="product-modal-media-fallback"></div>`;
+
+    categoryEl.textContent = category;
+    categoryEl.hidden = !category;
+    vendorEl.textContent = vendor;
+    titleEl.textContent = name;
+    priceEl.textContent = Number.isNaN(price) ? '' : `R${price.toFixed(2)}`;
+    descEl.textContent = description;
+
+    if (!Number.isNaN(rating)) {
+      ratingEl.innerHTML = `<span class="star-row">${buildStarRating(rating)}</span><span class="rating-number">${rating.toFixed(1)}</span>${reviews ? `<span class="rating-count">(${reviews} reviews)</span>` : ''}`;
+      ratingEl.hidden = false;
+    } else {
+      ratingEl.hidden = true;
     }
 
-    // Bind cart controls
-    document.querySelectorAll('.qty-btn.minus').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const index = parseInt(this.dataset.index);
-        let cart = JSON.parse(localStorage.getItem("localcart-cart")) || [];
-        if (cart[index]) {
-          cart[index].quantity -= 1;
-          if (cart[index].quantity <= 0) {
-            cart.splice(index, 1);
-          }
-          localStorage.setItem("localcart-cart", JSON.stringify(cart));
-          renderCart();
-          // Update cart count in header
-          const cartCount = document.getElementById("cart-count");
-          if (cartCount) {
-            const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartCount.textContent = totalQty;
-            cartCount.hidden = totalQty === 0;
-          }
-        }
-      });
-    });
+    addBtn.textContent = 'Add to cart';
+    addBtn.classList.remove('added');
+    addBtn.disabled = false;
 
-    document.querySelectorAll('.qty-btn.plus').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const index = parseInt(this.dataset.index);
-        let cart = JSON.parse(localStorage.getItem("localcart-cart")) || [];
-        if (cart[index]) {
-          cart[index].quantity += 1;
-          localStorage.setItem("localcart-cart", JSON.stringify(cart));
-          renderCart();
-          // Update cart count in header
-          const cartCount = document.getElementById("cart-count");
-          if (cartCount) {
-            const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
-            cartCount.textContent = totalQty;
-            cartCount.hidden = totalQty === 0;
-          }
-        }
-      });
-    });
-
-    document.querySelectorAll('.remove-item').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const index = parseInt(this.dataset.index);
-        let cart = JSON.parse(localStorage.getItem("localcart-cart")) || [];
-        cart.splice(index, 1);
-        localStorage.setItem("localcart-cart", JSON.stringify(cart));
-        renderCart();
-        // Update cart count in header
-        const cartCount = document.getElementById("cart-count");
-        if (cartCount) {
-          const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
-          cartCount.textContent = totalQty;
-          cartCount.hidden = totalQty === 0;
-        }
-      });
-    });
-
-    // Checkout button
-    const checkoutBtn = document.querySelector('.checkout-btn');
-    if (checkoutBtn) {
-      checkoutBtn.addEventListener('click', function() {
-        let cart = JSON.parse(localStorage.getItem("localcart-cart")) || [];
-        if (cart.length === 0) {
-          alert('Your cart is empty!');
-          return;
-        }
-        const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        if (confirm(`Confirm checkout for R${total.toFixed(2)}?`)) {
-          localStorage.setItem("localcart-cart", JSON.stringify([]));
-          renderCart();
-          const cartCount = document.getElementById("cart-count");
-          if (cartCount) {
-            cartCount.textContent = '0';
-            cartCount.hidden = true;
-          }
-          alert('✅ Order placed successfully!');
-        }
-      });
-    }
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
   }
 
-  renderCart();
-});
+  function closeModal() {
+    modal.hidden = true;
+    document.body.style.overflow = '';
+    activeCard = null;
+  }
+
+  cards.forEach((card) => {
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => openModal(card));
+  });
+
+  modal.addEventListener('click', (e) => {
+    if (e.target.closest('[data-modal-close]')) closeModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
+  });
+
+  addBtn.addEventListener('click', () => {
+    if (!activeCard) return;
+    const name = activeCard.dataset.name;
+    const vendor = activeCard.dataset.vendor;
+    const price = parseFloat(activeCard.dataset.price);
+    if (!name || Number.isNaN(price)) return;
+
+    addToCart(name, vendor, price);
+    addBtn.textContent = 'Added ✓';
+    addBtn.classList.add('added');
+    addBtn.disabled = true;
+    setTimeout(() => {
+      addBtn.textContent = 'Add to cart';
+      addBtn.classList.remove('added');
+      addBtn.disabled = false;
+    }, 900);
+  });
+}
