@@ -22,13 +22,13 @@
 
     <nav>
       <a href="vendor-dashboard.html" class="active">Dashboard</a>
-      <a href="products.html">Products</a>
-      <a href="orders.html">Orders</a>
-      <a href="subscription.html">Subcription</a>
+      <a href="vendor-dashboard.html">Products</a>
+      <a href="deliverytracker.html">Orders</a>
+      <a href="subscribe.html">Subscribe</a>
     </nav>
 
     <div class="header-right">
-      <button class="icon-btn" id="theme-toggle" aria-label="Toggle light and dark mode">
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
         <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="4"></circle>
           <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
@@ -43,30 +43,33 @@
     </div>
   </header>
 
-  <main>
-    <div class="page-head">
+  <main class="vendor-main">
+    <div class="vendor-page-head">
       <div>
         <h1>Welcome back, Maya's Kitchen</h1>
         <p>Here's how your shop is doing</p>
       </div>
       <button class="btn-primary" id="add-product-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
         Add product
       </button>
     </div>
 
-    <div class="stats">
-      <div class="stat-card">
-        <div class="stat-label">Sales this month</div>
-        <div class="stat-value accent">R4,280</div>
+    <div class="vendor-stats">
+      <div class="vendor-stat-card">
+        <div class="vendor-stat-label">Sales this month</div>
+        <div class="vendor-stat-value accent">R4,280</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Orders</div>
-        <div class="stat-value">38</div>
+      <div class="vendor-stat-card">
+        <div class="vendor-stat-label">Orders</div>
+        <div class="vendor-stat-value">38</div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Rating</div>
-        <div class="stat-value">4.8<span class="stat-suffix">/ 5</span></div>
+      <div class="vendor-stat-card">
+        <div class="vendor-stat-label">Rating</div>
+        <div class="vendor-stat-value">4.8<span class="stat-suffix">/ 5</span></div>
       </div>
     </div>
 
@@ -103,9 +106,30 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Action Buttons Row -->
+    <div style="display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap;">
+      <button class="btn-primary" id="overview-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+        </svg>
+        Overview
+      </button>
+      <button class="btn-primary" id="monitor-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 3h20v14H2z"></path>
+          <path d="M8 21h8"></path>
+          <path d="M12 17v4"></path>
+        </svg>
+        Monitor
+      </button>
+    </div>
   </main>
 
-<script src="index.js"></script>
+  <script src="index.js"></script>
 
 </body>
 </html>
