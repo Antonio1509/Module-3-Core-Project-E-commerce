@@ -1,13 +1,5 @@
 /* ===========================================================
    LocalCart — shared front-end script
-   Every init function checks for its target elements before
-   doing anything, so this one file can be safely included on
-   every page (index, about, contact, vendor-dashboard, ...)
-   without erroring on pages that don't have those elements.
-
-   Cart + theme are persisted in localStorage since this is a
-   real multi-page site now (state needs to survive navigating
-   from index.html -> cart.html, etc.), not a single-page demo.
    =========================================================== */
 
 const CART_KEY = 'localcart_cart_v1';
@@ -15,8 +7,221 @@ const THEME_KEY = 'localcart_theme';
 const SEARCH_HISTORY_KEY = 'localcart_recent_searches';
 const VIEWED_KEY = 'localcart_recently_viewed';
 const FOLLOWED_KEY = 'localcart_followed_vendors';
+const USER_KEY = 'localcart_user';
+const VENDOR_DATA_KEY = 'localcart_vendor_data';
+const CURRENT_VENDOR_KEY = 'localcart_current_vendor';
+
+/* ===========================================================
+   AUTH / LOGIN — Full user management
+   =========================================================== */
+
+function getCurrentUser() {
+  try {
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function setCurrentUser(user) {
+  try {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  } catch (e) {
+    console.warn('Could not save user:', e);
+  }
+}
+
+function isLoggedIn() {
+  const user = getCurrentUser();
+  return user && user.loggedIn === true;
+}
+
+function logoutUser() {
+  localStorage.removeItem(USER_KEY);
+  updateAllUserUI(null);
+  window.location.href = 'index.html';
+}
+
+function loginUser(userData) {
+  const user = {
+    name: userData.name || 'Guest User',
+    email: userData.email || '',
+    initials: userData.initials || getInitials(userData.name || 'Guest User'),
+    loggedIn: true,
+    loginTime: Date.now()
+  };
+  setCurrentUser(user);
+  updateAllUserUI(user);
+  return user;
+}
+
+function getInitials(name) {
+  if (!name) return 'GU';
+  const parts = name.trim().split(' ');
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+/* ===========================================================
+   VENDOR DATA MANAGEMENT
+   =========================================================== */
+
+function getVendorData() {
+  try {
+    const raw = localStorage.getItem(VENDOR_DATA_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveVendorData(data) {
+  try {
+    localStorage.setItem(VENDOR_DATA_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.warn('Could not save vendor data:', e);
+  }
+}
+
+function getCurrentVendorName() {
+  return localStorage.getItem(CURRENT_VENDOR_KEY) || "Maya's Kitchen";
+}
+
+function setCurrentVendorName(name) {
+  localStorage.setItem(CURRENT_VENDOR_KEY, name);
+}
+
+function getVendorProducts(vendorName) {
+  const data = getVendorData();
+  if (data[vendorName]) {
+    return data[vendorName].products || [];
+  }
+  return [];
+}
+
+function addProductToVendor(vendorName, product) {
+  const data = getVendorData();
+  if (!data[vendorName]) {
+    data[vendorName] = {
+      name: vendorName,
+      products: []
+    };
+  }
+  if (!data[vendorName].products) {
+    data[vendorName].products = [];
+  }
+  data[vendorName].products.push(product);
+  saveVendorData(data);
+  return product;
+}
+
+/* ===========================================================
+   UI UPDATE FUNCTIONS
+   =========================================================== */
+
+function updateAllUserUI(user) {
+  updateAvatar(user);
+  updateWelcomeMessage(user);
+  updateUserName(user);
+  updateLogoutButton(user);
+}
+
+function updateAvatar(user) {
+  const initials = user ? user.initials : 'GU';
+  
+  const avatarEl = document.getElementById('user-avatar');
+  if (avatarEl) {
+    avatarEl.textContent = initials;
+  }
+  
+  document.querySelectorAll('.avatar:not(#user-avatar)').forEach(el => {
+    if (!el.closest('.vendor-main') && !el.id === 'dash-avatar') {
+      el.textContent = initials;
+    }
+  });
+  
+  const dashAvatar = document.getElementById('dash-avatar');
+  if (dashAvatar && user) {
+    dashAvatar.textContent = initials;
+  }
+}
+
+function updateWelcomeMessage(user) {
+  const welcomeEl = document.querySelector('.hero h1');
+  if (welcomeEl && user) {
+    const name = user.name || 'there';
+    welcomeEl.textContent = `Welcome back, ${name}`;
+  } else if (welcomeEl) {
+    welcomeEl.textContent = 'Welcome to LocalCart';
+  }
+}
+
+function updateUserName(user) {
+  const nameEls = document.querySelectorAll('.user-name, .avatar-panel-header');
+  if (nameEls.length && user) {
+    nameEls.forEach(el => {
+      if (el.classList.contains('avatar-panel-header')) {
+        el.textContent = user.name || 'User';
+      } else {
+        el.textContent = user.name || 'User';
+      }
+    });
+  }
+}
+
+function updateLogoutButton(user) {
+  const panel = document.getElementById('avatar-panel');
+  if (!panel) return;
+  
+  let logoutBtn = panel.querySelector('.logout-btn');
+  
+  if (user && isLoggedIn()) {
+    if (!logoutBtn) {
+      logoutBtn = document.createElement('button');
+      logoutBtn.className = 'logout-btn';
+      logoutBtn.textContent = 'Log Out';
+      logoutBtn.type = 'button';
+      logoutBtn.style.cssText = `
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-top: 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      `;
+      logoutBtn.addEventListener('mouseenter', () => {
+        logoutBtn.style.background = 'var(--card-hover)';
+      });
+      logoutBtn.addEventListener('mouseleave', () => {
+        logoutBtn.style.background = 'var(--bg)';
+      });
+      logoutBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        logoutUser();
+      });
+      panel.appendChild(logoutBtn);
+    }
+  } else if (logoutBtn) {
+    logoutBtn.remove();
+  }
+}
+
+/* ===========================================================
+   DOM CONTENT LOADED
+   =========================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
+  const user = getCurrentUser();
+  updateAllUserUI(user);
+  
   initThemeToggle();
   initBrowseButton();
   initSearch();
@@ -31,12 +236,26 @@ document.addEventListener('DOMContentLoaded', () => {
   initProductModal();
   initAddProductButton();
   initAddProductForm();
-  initDashboardButtons(); // New: handles add-product.html form
+  initDashboardButtons();
+  initCartButton();
+  initLoginRedirect();
 });
 
 /* ---------------------------------------------------------
-   Theme toggle — persisted across pages via localStorage,
-   falls back to system preference on first visit.
+   Handle login redirect from login page
+--------------------------------------------------------- */
+function initLoginRedirect() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('login') === 'success') {
+    const user = getCurrentUser();
+    updateAllUserUI(user);
+    const newUrl = window.location.pathname + window.location.search.replace(/[?&]login=success/, '');
+    window.history.replaceState({}, document.title, newUrl);
+  }
+}
+
+/* ---------------------------------------------------------
+   Theme toggle
 --------------------------------------------------------- */
 function initThemeToggle() {
   const root = document.documentElement;
@@ -58,6 +277,23 @@ function initThemeToggle() {
 }
 
 /* ---------------------------------------------------------
+   Cart button — check login before navigating
+--------------------------------------------------------- */
+function initCartButton() {
+  const cartButton = document.getElementById('cart-button');
+  if (!cartButton) return;
+
+  cartButton.addEventListener('click', function(e) {
+    if (!isLoggedIn()) {
+      e.preventDefault();
+      sessionStorage.setItem('login_redirect', 'cart.html');
+      window.location.href = 'login.html';
+      return;
+    }
+  });
+}
+
+/* ---------------------------------------------------------
    Add Product Button Navigation
 --------------------------------------------------------- */
 function initAddProductButton() {
@@ -71,36 +307,30 @@ function initAddProductButton() {
 }
 
 /* ---------------------------------------------------------
-   Add Product Form - handles the add-product.html page
+   Add Product Form - Now saves to vendor data
 --------------------------------------------------------- */
 function initAddProductForm() {
-  // Check if we're on the add-product page
   const form = document.getElementById('add-product-form');
   if (!form) return;
 
   // Load vendor info
   function loadVendorInfo() {
-    try {
-      const vendorData = JSON.parse(localStorage.getItem('localcart_vendor_data') || '{}');
-      const currentVendor = localStorage.getItem('localcart_current_vendor') || "Maya's Kitchen";
-      
-      if (vendorData[currentVendor]) {
-        const vendor = vendorData[currentVendor];
-        const vendorNameEl = document.getElementById('vendor-name');
-        const avatarDisplay = document.getElementById('avatar-display');
-        if (vendorNameEl) vendorNameEl.textContent = vendor.name;
-        if (avatarDisplay) {
-          const initials = vendor.name.split(' ').map(p => p[0]).join('');
-          avatarDisplay.textContent = initials;
-        }
+    const vendorName = getCurrentVendorName();
+    const data = getVendorData();
+    
+    if (data[vendorName]) {
+      const vendor = data[vendorName];
+      const vendorNameEl = document.getElementById('vendor-name');
+      const avatarDisplay = document.getElementById('avatar-display');
+      if (vendorNameEl) vendorNameEl.textContent = vendor.name || vendorName;
+      if (avatarDisplay) {
+        const initials = (vendor.name || vendorName).split(' ').map(p => p[0]).join('');
+        avatarDisplay.textContent = initials;
       }
-    } catch (e) {
-      console.warn('Could not load vendor info:', e);
     }
   }
   loadVendorInfo();
 
-  // Image Upload
   const uploadArea = document.getElementById('image-upload-area');
   const fileInput = document.getElementById('product-image');
   const previewContainer = document.getElementById('image-preview');
@@ -166,7 +396,6 @@ function initAddProductForm() {
     });
   }
 
-  // Character Counter
   const description = document.getElementById('product-description');
   const charCount = document.getElementById('char-count');
 
@@ -178,18 +407,20 @@ function initAddProductForm() {
     });
   }
 
-  // Form Validation & Submit
   const publishBtn = form.querySelector('button[type="submit"]');
   const draftBtn = document.getElementById('save-draft-btn');
 
   function getFormData() {
     return {
+      id: `p${Date.now()}`,
       name: document.getElementById('product-name') ? document.getElementById('product-name').value.trim() : '',
       category: document.getElementById('product-category') ? document.getElementById('product-category').value : '',
       price: document.getElementById('product-price') ? parseFloat(document.getElementById('product-price').value) : NaN,
       stock: document.getElementById('product-stock') ? parseInt(document.getElementById('product-stock').value) : NaN,
       description: document.getElementById('product-description') ? document.getElementById('product-description').value.trim() : '',
-      image: uploadedImage
+      image: uploadedImage ? URL.createObjectURL(uploadedImage) : null,
+      status: 'published',
+      dateAdded: new Date().toISOString()
     };
   }
 
@@ -238,7 +469,10 @@ function initAddProductForm() {
       return;
     }
 
-    // Disable buttons
+    if (isDraft) {
+      data.status = 'draft';
+    }
+
     if (publishBtn) {
       publishBtn.disabled = true;
       publishBtn.innerHTML = '<span class="spinner"></span> Publishing...';
@@ -248,49 +482,31 @@ function initAddProductForm() {
       draftBtn.innerHTML = '<span class="spinner"></span> Saving...';
     }
 
-    // Simulate API call
     setTimeout(() => {
       try {
-        let vendorData = JSON.parse(localStorage.getItem('localcart_vendor_data') || '{}');
-        let currentVendor = localStorage.getItem('localcart_current_vendor') || "Maya's Kitchen";
+        const vendorName = getCurrentVendorName();
+        addProductToVendor(vendorName, data);
 
-        if (vendorData[currentVendor]) {
-          const newProduct = {
-            id: `p${Date.now()}`,
-            name: data.name,
-            price: data.price,
-            stock: data.stock,
-            category: data.category,
-            description: data.description,
-            image: data.image ? URL.createObjectURL(data.image) : null,
-            status: isDraft ? 'draft' : 'published'
-          };
+        const status = isDraft ? 'saved as draft' : 'published';
+        showToast(
+          `✅ Product ${status}!`,
+          `"${data.name}" has been ${status} and added to your shop.`,
+          'success'
+        );
 
-          vendorData[currentVendor].products.push(newProduct);
-          localStorage.setItem('localcart_vendor_data', JSON.stringify(vendorData));
+        form.reset();
+        if (description) description.dispatchEvent(new Event('input'));
+        if (previewContainer) previewContainer.style.display = 'none';
+        if (uploadArea) uploadArea.classList.remove('has-image');
+        uploadedImage = null;
+        if (fileInput) fileInput.value = '';
 
-          const status = isDraft ? 'saved as draft' : 'published';
-          showToast(
-            `✅ Product ${status}!`,
-            `"${data.name}" has been ${status}.`,
-            'success'
-          );
-
-          form.reset();
-          if (description) description.dispatchEvent(new Event('input'));
-          if (previewContainer) previewContainer.style.display = 'none';
-          if (uploadArea) uploadArea.classList.remove('has-image');
-          uploadedImage = null;
-          if (fileInput) fileInput.value = '';
-
-          setTimeout(() => {
-            window.location.href = 'vendor-dashboard.html';
-          }, 2000);
-        } else {
-          showToast('Error', 'Vendor not found. Please try again.', 'error');
-        }
+        setTimeout(() => {
+          window.location.href = 'vendor-dashboard.html';
+        }, 2000);
       } catch (e) {
         showToast('Error', 'Something went wrong. Please try again.', 'error');
+        console.error('Error saving product:', e);
       }
 
       if (publishBtn) {
@@ -331,7 +547,6 @@ function initAddProductForm() {
     });
   }
 
-  // Keyboard shortcut: Ctrl+S or Cmd+S to save draft
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       const activeElement = document.activeElement;
@@ -344,8 +559,7 @@ function initAddProductForm() {
 }
 
 /* ---------------------------------------------------------
-   "Browse products" hero button — smooth-scrolls to the
-   Featured products grid, only present on the shop page.
+   "Browse products" hero button
 --------------------------------------------------------- */
 function initBrowseButton() {
   const browseBtn = document.getElementById('browse-btn') || document.getElementById('browse-products');
@@ -358,13 +572,7 @@ function initBrowseButton() {
 }
 
 /* ---------------------------------------------------------
-   Search box — two modes:
-   - On the shop page (has #products-grid): filters product
-     cards live as you type, combined with any active category.
-   - On every other page: pressing Enter redirects to
-     index.html?q=<term> so search works from anywhere on the site.
-   Also reads ?q= on the shop page itself so a search that
-   redirected here pre-fills and applies automatically.
+   Search box
 --------------------------------------------------------- */
 function initSearch() {
   const input = document.getElementById('search-input');
@@ -373,7 +581,6 @@ function initSearch() {
   const productsGrid = document.getElementById('products-grid');
 
   if (!productsGrid) {
-    // Not the shop page — Enter redirects to the shop with the query.
     input.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;
       e.preventDefault();
@@ -384,7 +591,6 @@ function initSearch() {
     return;
   }
 
-  // Shop page: live filtering.
   const state = { searchTerm: '', activeCategory: null };
 
   const params = new URLSearchParams(window.location.search);
@@ -406,14 +612,12 @@ function initSearch() {
     if (term) recordSearch(term);
   });
 
-  // Expose so initCategoryFilter (defined separately) can share the same state.
   window.__localcartFilterState = state;
   applyFilters(state);
 }
 
 /* ---------------------------------------------------------
-   Category filter — click a category card to filter the
-   Featured products grid; click again to clear it.
+   Category filter
 --------------------------------------------------------- */
 function initCategoryFilter() {
   const categoryCards = document.querySelectorAll('.category-card');
@@ -429,7 +633,7 @@ function initCategoryFilter() {
 
     const activate = () => {
       const category = card.dataset.category;
-      if (!category) return; // card not wired for filtering
+      if (!category) return;
       const alreadyActive = card.classList.contains('active');
 
       categoryCards.forEach((c) => c.classList.remove('active'));
@@ -470,8 +674,7 @@ function applyFilters(state) {
 }
 
 /* ---------------------------------------------------------
-   Cart — persisted in localStorage so it survives navigating
-   between pages (index.html -> cart.html, etc).
+   Cart
 --------------------------------------------------------- */
 function getCart() {
   try {
@@ -503,9 +706,7 @@ function renderCartBadge() {
   if (!badge) return;
   const totalQty = getCart().reduce((sum, item) => sum + item.qty, 0);
   badge.textContent = String(totalQty);
-  if (badge.hasAttribute('hidden') || badge.hidden !== undefined) {
-    badge.hidden = totalQty === 0 && badge.dataset.hideWhenEmpty === 'true';
-  }
+  badge.hidden = totalQty === 0;
 }
 
 function initAddToCart() {
@@ -536,98 +737,175 @@ function initAddToCart() {
 }
 
 /* ===========================================================
-   Vendor dashboard — client-side vendor switcher.
-   No backend yet, so "logging in as a different vendor" is
-   simulated: picking a vendor from the dropdown swaps the
-   welcome text, avatar, stats and recent-orders table using
-   the sample data below.
+   Vendor dashboard - Now shows real products from localStorage
    =========================================================== */
-const VENDORS = {
-  maya: {
-    name: "Maya's Kitchen",
-    initial: 'M',
-    sales: 'R4,280',
-    orders: 38,
-    rating: '4.8',
-    recentOrders: [
-      { id: '#LC-10482', item: 'Honey oat cookies x2', status: 'packing', amount: 'R170.00' },
-      { id: '#LC-10475', item: 'Ginger snap box', status: 'delivered', amount: 'R95.00' },
-      { id: '#LC-10461', item: 'Honey oat cookies x1', status: 'delivered', amount: 'R85.00' },
-    ],
-  },
-  naledi: {
-    name: 'Naledi Naturals',
-    initial: 'N',
-    sales: 'R6,150',
-    orders: 52,
-    rating: '4.9',
-    recentOrders: [
-      { id: '#LC-10490', item: 'Whipped Shea Body Butter x3', status: 'delivered', amount: 'R360.00' },
-      { id: '#LC-10488', item: 'Rooibos & Honey Lip Balm x2', status: 'packing', amount: 'R70.00' },
-      { id: '#LC-10479', item: 'Whipped Shea Body Butter x1', status: 'delivered', amount: 'R120.00' },
-    ],
-  },
-  zanele: {
-    name: 'Zanele Beadwork',
-    initial: 'Z',
-    sales: 'R2,940',
-    orders: 14,
-    rating: '4.6',
-    recentOrders: [
-      { id: '#LC-10471', item: 'Beaded Woven Tote Bag', status: 'delivered', amount: 'R385.00' },
-      { id: '#LC-10466', item: 'Beaded Earrings Set', status: 'packing', amount: 'R140.00' },
-      { id: '#LC-10450', item: 'Beaded Woven Tote Bag', status: 'delivered', amount: 'R385.00' },
-    ],
-  },
-};
 
 function initVendorDashboard() {
-  const select = document.getElementById('vendor-switch');
-  if (!select) return; // not on the vendor dashboard page
+  // Check if we're on the vendor dashboard page
+  const mainEl = document.querySelector('.vendor-main');
+  if (!mainEl) return;
 
-  const welcome = document.getElementById('dash-welcome');
-  const vendorNameEl = document.getElementById('dash-vendor-name');
-  const avatarEl = document.getElementById('dash-avatar');
-  const salesEl = document.getElementById('stat-sales');
-  const ordersEl = document.getElementById('stat-orders');
-  const ratingEl = document.getElementById('stat-rating-value');
-  const tbody = document.getElementById('orders-tbody');
-
-  function renderVendor(key) {
-    const v = VENDORS[key];
-    if (!v) return;
-
-    if (welcome) welcome.textContent = `Welcome back, ${v.name}`;
-    if (vendorNameEl) vendorNameEl.textContent = v.name;
-    if (avatarEl) avatarEl.textContent = v.initial;
-    if (salesEl) salesEl.textContent = v.sales;
-    if (ordersEl) ordersEl.textContent = String(v.orders);
-    if (ratingEl) ratingEl.textContent = v.rating;
-
-    if (tbody) {
-      tbody.innerHTML = '';
-      v.recentOrders.forEach((o) => {
-        const tr = document.createElement('tr');
-        const isDelivered = o.status === 'delivered';
-        tr.innerHTML = `
-          <td class="order-id">${o.id}</td>
-          <td>${o.item}</td>
-          <td><span class="status-pill ${isDelivered ? 'status-delivered' : 'status-packing'}">${isDelivered ? 'Delivered' : 'Packing'}</span></td>
-          <td class="num amount">${o.amount}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+  // Initialize vendor data if it doesn't exist
+  const vendorName = getCurrentVendorName();
+  let data = getVendorData();
+  
+  // If no vendor data exists, create default
+  if (!data[vendorName]) {
+    data[vendorName] = {
+      name: vendorName,
+      products: []
+    };
+    saveVendorData(data);
   }
 
-  select.addEventListener('change', () => renderVendor(select.value));
-  renderVendor(select.value);
+  // Update vendor stats
+  updateVendorStats(vendorName);
+  
+  // Load and display vendor products
+  renderVendorProducts(vendorName);
+  
+  // Set up vendor switch if it exists
+  const select = document.getElementById('vendor-switch');
+  if (select) {
+    select.addEventListener('change', () => {
+      const newVendor = select.value;
+      setCurrentVendorName(newVendor);
+      updateVendorStats(newVendor);
+      renderVendorProducts(newVendor);
+    });
+  }
+}
+
+function updateVendorStats(vendorName) {
+  const data = getVendorData();
+  const vendor = data[vendorName];
+  
+  if (!vendor) return;
+  
+  const products = vendor.products || [];
+  const publishedProducts = products.filter(p => p.status !== 'draft');
+  
+  // Update stats
+  const productCountEl = document.getElementById('stat-products') || 
+                         document.querySelector('.vendor-stat-card:nth-child(1) .vendor-stat-value');
+  const salesEl = document.getElementById('stat-sales');
+  const ordersEl = document.getElementById('stat-orders');
+  
+  if (productCountEl && !productCountEl.closest('.vendor-stat-card')?.querySelector('.vendor-stat-label')?.textContent.includes('Sales')) {
+    // This is the products stat
+    const card = productCountEl.closest('.vendor-stat-card');
+    if (card) {
+      const label = card.querySelector('.vendor-stat-label');
+      if (label) label.textContent = 'Products';
+      productCountEl.textContent = publishedProducts.length;
+    }
+  }
+  
+  // Update other stats if they exist
+  if (salesEl) {
+    // Calculate total sales from products (simulated)
+    const totalSales = publishedProducts.reduce((sum, p) => sum + (p.price || 0), 0);
+    salesEl.textContent = `R${totalSales.toFixed(0)}`;
+  }
+  
+  if (ordersEl) {
+    ordersEl.textContent = publishedProducts.length * 2; // Simulated orders
+  }
+  
+  // Update welcome message with vendor name
+  const welcomeEl = document.getElementById('dash-welcome');
+  if (welcomeEl) {
+    welcomeEl.textContent = `Welcome back, ${vendor.name || vendorName}`;
+  }
+  
+  // Update vendor name in header
+  const vendorNameEl = document.getElementById('dash-vendor-name');
+  if (vendorNameEl) {
+    vendorNameEl.textContent = vendor.name || vendorName;
+  }
+  
+  // Update avatar
+  const avatarEl = document.getElementById('dash-avatar');
+  if (avatarEl) {
+    const initials = (vendor.name || vendorName).split(' ').map(p => p[0]).join('');
+    avatarEl.textContent = initials;
+  }
+}
+
+function renderVendorProducts(vendorName) {
+  const data = getVendorData();
+  const vendor = data[vendorName];
+  
+  if (!vendor) return;
+  
+  const products = vendor.products || [];
+  const publishedProducts = products.filter(p => p.status !== 'draft');
+  
+  // Find or create products table
+  let productsSection = document.getElementById('vendor-products-section');
+  
+  if (!productsSection) {
+    // Create products section if it doesn't exist
+    const mainEl = document.querySelector('.vendor-main');
+    if (!mainEl) return;
+    
+    productsSection = document.createElement('div');
+    productsSection.id = 'vendor-products-section';
+    productsSection.style.marginTop = '32px';
+    productsSection.innerHTML = `
+      <h2 class="section-title">Your Products (${publishedProducts.length})</h2>
+      <div class="orders-card" id="products-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Stock</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody"></tbody>
+        </table>
+      </div>
+    `;
+    mainEl.appendChild(productsSection);
+  }
+  
+  const tbody = document.getElementById('products-tbody');
+  if (!tbody) return;
+  
+  // Update section title
+  const title = productsSection.querySelector('.section-title');
+  if (title) {
+    title.textContent = `Your Products (${publishedProducts.length})`;
+  }
+  
+  if (publishedProducts.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-faint);">
+          <p style="font-size: 16px; margin-bottom: 8px;">No products yet</p>
+          <p style="font-size: 13px;">Click "Add product" to list your first item.</p>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+  
+  tbody.innerHTML = publishedProducts.map(product => `
+    <tr>
+      <td><strong>${product.name}</strong></td>
+      <td>${product.category || 'Uncategorized'}</td>
+      <td class="num amount">R${(product.price || 0).toFixed(2)}</td>
+      <td>${product.stock || 0}</td>
+      <td><span class="status-pill ${product.status === 'published' ? 'status-delivered' : 'status-packing'}">${product.status || 'Published'}</span></td>
+    </tr>
+  `).join('');
 }
 
 /* ---------------------------------------------------------
-   Contact form — client-side validation + a simulated submit
-   (there's no backend yet). Shows inline field errors and a
-   success message, then resets the form.
+   Contact form
 --------------------------------------------------------- */
 function initContactForm() {
   const form = document.getElementById('contact-form');
@@ -681,7 +959,6 @@ function initContactForm() {
     return valid;
   }
 
-  // Clear a field's error state as soon as the person fixes it.
   Object.keys(fields).forEach((key) => {
     const field = fields[key];
     if (!field) return;
@@ -694,7 +971,6 @@ function initContactForm() {
 
     if (!validate()) return;
 
-    // No backend yet — simulate a network round-trip, then confirm.
     submitBtn.disabled = true;
     const originalLabel = submitBtn.textContent;
     submitBtn.textContent = 'Sending…';
@@ -709,10 +985,7 @@ function initContactForm() {
 }
 
 /* ===========================================================
-   Account history — recent searches, recently viewed products,
-   and followed vendors. Everything here is genuinely tracked
-   from real interactions (not placeholder data) and stored in
-   localStorage, since there's no backend/auth yet.
+   Account history
    =========================================================== */
 
 function getList(key) {
@@ -759,9 +1032,7 @@ function toggleFollow(vendor) {
 }
 
 /* ---------------------------------------------------------
-   Tracks "recently viewed" whenever a product card is clicked
-   (anywhere other than its Add to cart button, which already
-   stops propagation on its own click handler).
+   Product view tracking
 --------------------------------------------------------- */
 function initProductViewTracking() {
   document.querySelectorAll('.product-card').forEach((card) => {
@@ -772,15 +1043,13 @@ function initProductViewTracking() {
 }
 
 /* ---------------------------------------------------------
-   Injects a small follow-toggle star into every product card's
-   vendor label, so "vendors you follow" reflects real clicks
-   without requiring any HTML changes on existing pages.
+   Vendor follow buttons
 --------------------------------------------------------- */
 const FOLLOW_ICON_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
 
 function initVendorFollowButtons() {
   document.querySelectorAll('.product-vendor').forEach((el) => {
-    if (el.querySelector('.follow-toggle')) return; // already injected
+    if (el.querySelector('.follow-toggle')) return;
     const vendorName = el.textContent.trim();
     if (!vendorName) return;
 
@@ -793,7 +1062,7 @@ function initVendorFollowButtons() {
     if (isFollowing(vendorName)) btn.classList.add('following');
 
     btn.addEventListener('click', (e) => {
-      e.stopPropagation(); // don't also record this as a "product viewed" click
+      e.stopPropagation();
       const nowFollowing = toggleFollow(vendorName);
       btn.classList.toggle('following', nowFollowing);
       if (typeof window.__localcartRenderAvatarPanel === 'function') {
@@ -812,11 +1081,7 @@ function syncFollowButtons() {
 }
 
 /* ---------------------------------------------------------
-   Avatar account panel — click the avatar (id="user-avatar")
-   to see recent searches, recently viewed products, and
-   followed vendors. Deliberately scoped to #user-avatar only,
-   so it never attaches to the vendor dashboard's own avatar
-   (#dash-avatar), which represents a different persona.
+   Avatar account panel
 --------------------------------------------------------- */
 function initAvatarPanel() {
   const avatar = document.getElementById('user-avatar');
@@ -867,6 +1132,12 @@ function initAvatarPanel() {
   }
 
   function renderPanel() {
+    const user = getCurrentUser();
+    const header = panel.querySelector('.avatar-panel-header');
+    if (header && user) {
+      header.textContent = user.name || 'User';
+    }
+
     renderRow('recent-searches-list', getList(SEARCH_HISTORY_KEY), 'No recent searches.', (term) => ({
       label: term,
       onClick: () => { window.location.href = `index.html?q=${encodeURIComponent(term)}`; },
@@ -932,17 +1203,11 @@ function initAvatarPanel() {
   });
 }
 
-/* ===========================================================
-   Product detail modal — clicking a product card (anywhere
-   except its Add to cart button or the vendor follow star,
-   both of which already stop propagation) opens a modal with
-   the image, rating, description and price, pulled straight
-   from that card's data-* attributes. No HTML changes needed
-   on existing pages — the modal markup is injected once here.
-   =========================================================== */
-
+/* ---------------------------------------------------------
+   Product detail modal
+--------------------------------------------------------- */
 function buildStarRating(rating) {
-  const rounded = Math.round(rating * 2) / 2; // nearest 0.5
+  const rounded = Math.round(rating * 2) / 2;
   let starsHtml = '';
   for (let i = 1; i <= 5; i += 1) {
     if (rounded >= i) {
@@ -1076,20 +1341,33 @@ function initProductModal() {
   });
 }
 
-// ==========================================================
-// INITIAL PRODUCT FILTER
-// ==========================================================
+/* ---------------------------------------------------------
+   Dashboard navigation buttons
+--------------------------------------------------------- */
+function initDashboardButtons() {
+  const overviewBtn = document.getElementById('overview-btn');
+  if (overviewBtn) {
+    overviewBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = 'rankoverview.html';
+    });
+  }
 
-// Run filter after page loads
+  const monitorBtn = document.getElementById('monitor-btn');
+  if (monitorBtn) {
+    monitorBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location.href = 'deliverytracker.html';
+    });
+  }
+}
+
+// Initial filter
 setTimeout(() => {
   applyFilters(window.__localcartFilterState || { searchTerm: '', activeCategory: null });
 }, 100);
 
-// ==========================================================
-// CART PAGE FUNCTIONALITY (if on cart.html)
-// ==========================================================
-
-// This runs if cart.html exists
+// Cart page functionality
 document.addEventListener('DOMContentLoaded', function() {
   const cartContainer = document.querySelector('.cart-items');
   const totalEl = document.querySelector('.cart-total');
@@ -1119,13 +1397,11 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
     `).join('');
 
-    // Update total
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     if (totalEl) {
       totalEl.textContent = `R${total.toFixed(2)}`;
     }
 
-    // Bind cart controls
     document.querySelectorAll('.qty-btn.minus').forEach(btn => {
       btn.addEventListener('click', function() {
         const index = parseInt(this.dataset.index);
@@ -1137,7 +1413,6 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           localStorage.setItem("localcart-cart", JSON.stringify(cart));
           renderCart();
-          // Update cart count in header
           const cartCount = document.getElementById("cart-count");
           if (cartCount) {
             const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -1156,7 +1431,6 @@ document.addEventListener('DOMContentLoaded', function() {
           cart[index].quantity += 1;
           localStorage.setItem("localcart-cart", JSON.stringify(cart));
           renderCart();
-          // Update cart count in header
           const cartCount = document.getElementById("cart-count");
           if (cartCount) {
             const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -1174,7 +1448,6 @@ document.addEventListener('DOMContentLoaded', function() {
         cart.splice(index, 1);
         localStorage.setItem("localcart-cart", JSON.stringify(cart));
         renderCart();
-        // Update cart count in header
         const cartCount = document.getElementById("cart-count");
         if (cartCount) {
           const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -1184,7 +1457,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     });
 
-    // Checkout button
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
       checkoutBtn.addEventListener('click', function() {
@@ -1207,29 +1479,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   }
-
-  /* ---------------------------------------------------------
-   Dashboard Button Navigation - Overview & Monitor
---------------------------------------------------------- */
-function initDashboardButtons() {
-  // Overview button - navigate to rankoverview.html
-  const overviewBtn = document.getElementById('overview-btn');
-  if (overviewBtn) {
-    overviewBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      window.location.href = 'rankoverview.html';
-    });
-  }
-
-  // Monitor button - navigate to deliverytracker.html
-  const monitorBtn = document.getElementById('monitor-btn');
-  if (monitorBtn) {
-    monitorBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      window.location.href = 'deliverytracker.html';
-    });
-  }
-}
 
   renderCart();
 });
