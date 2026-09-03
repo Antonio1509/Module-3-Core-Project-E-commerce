@@ -101,3 +101,26 @@ function addToCart(product, btnEl) {
     if (e.key === "Escape") closeDropdown();
   });
 })();
+
+/* =========================================================
+   Logout
+   Wires up any ".logout-link" button in the header dropdown.
+   Clears locally-stored session data and sends the person to
+   the existing login page. Update LOGIN_PAGE_URL below if your
+   login page lives at a different path/filename.
+   ========================================================= */
+(function () {
+  const LOGIN_PAGE_URL = "login.html";
+
+  document.querySelectorAll(".logout-link").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      // Clear anything tied to the logged-in session. Follow state,
+      // profile edits, and cart contents are left alone on purpose —
+      // remove those too here if logout should also reset local data.
+      localStorage.removeItem("localcart-token");
+      localStorage.removeItem("localcart-user");
+
+      window.location.href = LOGIN_PAGE_URL;
+    });
+  });
+})();
