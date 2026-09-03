@@ -95,13 +95,22 @@ function renderVendor() {
   }
 
   // Follow toggle
-  const followBtn = document.getElementById("follow-btn");
-  followBtn.addEventListener("click", () => {
-    const following = followBtn.classList.toggle("btn-primary");
-    followBtn.classList.toggle("btn-outline", !following);
-    followBtn.textContent = following ? "✓ Following" : "+ Follow";
-    showToast(following ? `You're now following ${vendor.name}` : `Unfollowed ${vendor.name}`);
-  });
+ const followBtn = document.getElementById("follow-btn");
+// Initialize button state based on current follow status
+function updateFollowButton() {
+  const isFollowing = isFollowingVendor(CURRENT_USER_ID, vendor.id);
+  followBtn.classList.toggle("btn-primary", isFollowing);
+  followBtn.classList.toggle("btn-outline", !isFollowing);
+  followBtn.textContent = isFollowing ? "✓ Following" : "+ Follow";
+}
+followBtn.addEventListener("click", () => {
+  const nowFollowing = toggleFollowVendor(CURRENT_USER_ID, vendor.id);
+  updateFollowButton();
+  showToast(nowFollowing ? `You're now following ${vendor.name}` : `Unfollowed ${vendor.name}`);
+});
+// Call once to initialize on page load
+updateFollowButton();
+
 
   // Tabs
   document.querySelectorAll(".tab-btn").forEach(btn => {
