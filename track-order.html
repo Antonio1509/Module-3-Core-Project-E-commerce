@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="icon"
+      href="https://i.ibb.co/LWW04LT/logo.png"
+      type="image/png"
+    />
+    <title>Track order · LC-10482</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Header -->
+    <header>
+      <div class="logo">
+        <span class="logo-mark">
+          <img
+            src="https://i.ibb.co/LWW04LT/logo.png"
+            alt="LocalCart"
+            width="20"
+            height="20"
+          />
+        </span>
+        LocalCart
+      </div>
+
+      <nav>
+        <a href="index.html">Dashboard</a>
+        <a href="vendors.html" class="active">Vendors</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="subscribe.html">Subscribe</a>
+      </nav>
+
+      <div class="header-right">
+        <button
+          class="icon-btn"
+          id="theme-toggle"
+          aria-label="Toggle light and dark mode"
+        >
+          <svg
+            class="icon-sun"
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="4"></circle>
+            <path
+              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+            ></path>
+          </svg>
+          <svg
+            class="icon-moon"
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+          </svg>
+        </button>
+
+        <label class="search-box">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            type="text"
+            id="vendor-search"
+            placeholder="Search vendors…"
+            aria-label="Search vendors"
+          />
+        </label>
+
+        <button
+          class="icon-btn"
+          aria-label="Cart"
+          onclick="window.location.href = 'cart.html'"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path
+              d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+            ></path>
+          </svg>
+        </button>
+
+        <div class="profile-dropdown-wrap">
+          <button
+            class="profile-toggle"
+            id="profile-toggle"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-label="Open profile menu"
+          >
+            <div class="avatar">TM</div>
+          </button>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <div class="profile-dropdown-header">
+              <div class="avatar">TM</div>
+              <div>
+                <strong data-profile-name>Thabo Mokoena</strong>
+                <span data-profile-email>thabo@example.com</span>
+              </div>
+            </div>
+            <div class="profile-dropdown-links">
+              <a href="users.html">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                My Profile
+              </a>
+              <a href="cart.html">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="9" cy="21" r="1"></circle>
+                  <circle cx="20" cy="21" r="1"></circle>
+                  <path
+                    d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"
+                  ></path>
+                </svg>
+                My Orders
+              </a>
+              <div class="divider"></div>
+              <button type="button" class="logout-link">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="track-card">
+        <!-- HEADER -->
+        <div class="track-header">
+          <h1 class="track-title">
+            Track order <span class="order-id">#LC-10482</span>
+          </h1>
+          <p class="track-date">Placed 25 August 2026</p>
+        </div>
+
+        <!-- TIMELINE WITH PROFESSIONAL ICONS -->
+        <ul class="timeline">
+          <li class="timeline-item done">
+            <span class="status-icon">
+              <!-- Checkmark icon for completed -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
+            <div class="status-content">
+              <strong class="status-label">Order placed</strong>
+              <span class="status-time">25 Aug, 14:02</span>
+            </div>
+          </li>
+          <li class="timeline-item done">
+            <span class="status-icon">
+              <!-- Checkmark icon for completed -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
+            <div class="status-content">
+              <strong class="status-label">Payment confirmed</strong>
+              <span class="status-time">25 Aug, 14:03</span>
+            </div>
+          </li>
+          <li class="timeline-item active">
+            <span class="status-icon">
+              <!-- Package/Box icon for packing -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </span>
+            <div class="status-content">
+              <strong class="status-label">Packing</strong>
+              <span class="status-time">In progress</span>
+            </div>
+          </li>
+          <li class="timeline-item pending">
+            <span class="status-icon">
+              <!-- Truck icon for delivery -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13"></rect>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                <circle cx="5.5" cy="18" r="2.5"></circle>
+                <circle cx="18.5" cy="18" r="2.5"></circle>
+              </svg>
+            </span>
+            <div class="status-content">
+              <strong class="status-label">Out for delivery</strong>
+              <span class="status-time">Pending</span>
+            </div>
+          </li>
+          <li class="timeline-item pending">
+            <span class="status-icon">
+              <!-- Home icon for delivered -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1"></path>
+              </svg>
+            </span>
+            <div class="status-content">
+              <strong class="status-label">Delivered</strong>
+              <span class="status-time">Pending</span>
+            </div>
+          </li>
+        </ul>
+
+        <!-- DIVIDER -->
+        <hr class="track-divider" />
+
+        <!-- ITEMS IN ORDER - NO EMOJIS -->
+        <div class="items-section">
+          <h2 class="items-title">Items in this order</h2>
+          <ul class="items-list">
+            <li>
+              <span class="item-icon-box" style="background: #c08a34;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                  <path d="M2 17l10 5 10-5"></path>
+                  <path d="M2 12l10 5 10-5"></path>
+                </svg>
+              </span>
+              <span class="item-name">Honey oat cookies</span>
+              <span class="item-vendor">Maya's Kitchen</span>
+            </li>
+            <li>
+              <span class="item-icon-box" style="background: #40916c;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                  <path d="M2 17l10 5 10-5"></path>
+                  <path d="M2 12l10 5 10-5"></path>
+                </svg>
+              </span>
+              <span class="item-name">Shea body butter</span>
+              <span class="item-vendor">Pure Roots Skincare</span>
+            </li>
+            <li>
+              <span class="item-icon-box" style="background: #3a6ea5;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                  <path d="M2 17l10 5 10-5"></path>
+                  <path d="M2 12l10 5 10-5"></path>
+                </svg>
+              </span>
+              <span class="item-name">Beaded tote bag</span>
+              <span class="item-vendor">Thandi Designs</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-logo">
+        <span class="logo-mark">
+          <img
+            src="https://i.ibb.co/LWW04LT/logo.png"
+            alt="LocalCart"
+            width="20"
+            height="27"
+          />
+        </span>
+        LocalCart
+      </div>
+
+      <nav class="footer-links">
+        <a href="index.html">Shop</a>
+        <a href="vendors.html">Vendors</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="subscribe.html">Subscribe</a>
+      </nav>
+
+      <p class="footer-copy">
+        © 2026 LocalCart. Supporting small South African businesses.
+      </p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="track-order.js"></script>
+
+  </body>
+</html>
