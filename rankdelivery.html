@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RankDrop Pickup Points</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; }
+  :root{
+    --bg-page: #0f0f10;
+    --bg-card: #1b1b1d;
+    --bg-field: #2a2a2d;
+    --border-default: #3a3a3d;
+    --text-primary: #f5f5f5;
+    --text-secondary: #9a9a9d;
+    --text-muted: #6f6f72;
+    --accent: #f5821f;
+    --bg: var(--bg-page);
+    --panel: var(--bg-card);
+    --panel2: var(--bg-field);
+    --border: var(--border-default);
+    --text: var(--text-primary);
+    --muted: var(--text-secondary);
+    --blue: var(--accent);
+    --green: var(--accent);
+    --orange: var(--accent);
+    --purple: var(--accent);
+    --yellow: var(--accent);
+  }
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background:
+      radial-gradient(circle at 75% 15%, rgba(245, 130, 31, 0.06), transparent 28%),
+      linear-gradient(135deg, #0f0f10 0%, #111113 55%, #171719 100%);
+    color:var(--text);
+  }
+  button,input{font:inherit}
+  button{cursor:pointer}
+  .app{max-width:1180px;margin:auto;padding:34px 34px 55px}
+  .topbar{display:flex;align-items:center;gap:18px;margin-bottom:12px}
+  .back{
+    width:48px;height:48px;border-radius:50%;border:1px solid #1b3348;
+    background:var(--bg-field);color:var(--text-primary);font-size:27px;line-height:1;
+  }
+  .back:hover{border-color:var(--accent)}
+  h1{font-size:32px;margin:0;font-weight:760;letter-spacing:-.7px}
+  .subtitle{margin:0 0 34px 66px;color:var(--text-secondary);font-size:16px}
+  .steps{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;margin:8px 0 34px}
+  .step{display:flex;align-items:center;gap:14px;color:var(--text-secondary);position:relative}
+  .step:not(:last-child):after{content:"";height:1px;background:var(--border-default);position:absolute;left:220px;right:10px}
+  .circle{width:40px;height:40px;border-radius:50%;border:1px solid var(--text-muted);display:grid;place-items:center;flex:none;font-weight:700}
+  .done .circle{background:var(--accent);border-color:var(--accent);color:#111;font-size:21px}
+  .active .circle{background:var(--blue);border-color:var(--blue)}
+  .active{color:#fff;font-weight:650}
+  .searchrow{display:grid;grid-template-columns:1fr 294px;gap:14px;margin-bottom:24px}
+  .searchbox,.locationbtn{
+    height:62px;border:1px solid var(--border);border-radius:11px;background:var(--bg-field);color:var(--text-primary);
+    display:flex;align-items:center;padding:0 20px;
+  }
+  .searchbox span{font-size:24px;color:var(--text-secondary);margin-right:15px}
+  .searchbox input{background:none;border:0;outline:0;color:var(--text-primary);width:100%;font-size:17px}
+  .searchbox input::placeholder{color:var(--text-muted)}
+  .locationbtn{justify-content:center;font-weight:650;gap:12px}
+  .map{
+    position:relative;height:500px;border:1px solid #21415b;border-radius:12px;overflow:hidden;
+    background:
+      linear-gradient(22deg,transparent 47%,rgba(30,111,190,.45) 48%,rgba(30,111,190,.45) 48.5%,transparent 49%),
+      linear-gradient(113deg,transparent 38%,rgba(23,91,151,.55) 39%,rgba(23,91,151,.55) 39.5%,transparent 40%),
+      repeating-linear-gradient(32deg,rgba(70,106,131,.18) 0 1px,transparent 1px 19px),
+      repeating-linear-gradient(122deg,rgba(70,106,131,.15) 0 1px,transparent 1px 23px),
+      radial-gradient(circle at 30% 48%,rgba(24,111,177,.20),transparent 22%),
+      linear-gradient(135deg,#0b2032,#0b2942 58%,#08233b);
+  }
+  .map:before{
+    content:"";position:absolute;inset:0;
+    background:
+      linear-gradient(90deg,transparent 0 15%,rgba(8,13,20,.18) 15% 15.5%,transparent 15.5% 34%,rgba(8,13,20,.16) 34% 34.5%,transparent 34.5% 67%,rgba(8,13,20,.15) 67% 67.5%,transparent 67.5%),
+      linear-gradient(25deg,transparent 0 65%,rgba(5,11,18,.25) 65% 75%,transparent 75%);
+    pointer-events:none;
+  }
+  .maplabel{position:absolute;color:#e4e9ee;font-size:14px;font-weight:650;letter-spacing:.3px;text-shadow:0 1px 4px #000}
+  .m1{left:20%;top:9%}.m2{left:8%;top:28%}.m3{left:42%;top:28%}.m4{left:68%;top:11%}
+  .m5{left:16%;top:56%}.m6{left:46%;top:57%}.m7{left:64%;top:79%}.m8{left:22%;top:86%}
+  .marker{
+    position:absolute;width:38px;height:48px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+    display:grid;place-items:center;box-shadow:0 0 25px rgba(0,0,0,.35);z-index:2
+  }
+  .marker:after{content:"";width:14px;height:14px;border-radius:50%;background:white}
+  .green{background:var(--green);left:25%;top:28%}.orange{background:var(--orange);left:21%;top:60%}
+  .purple{background:var(--purple);left:49%;top:10%}.blue{background:#2676e8;left:41%;top:76%}.blue-cape{background:#2676e8;left:78%;top:33%}.blue-wyneberg{background:#2676e8;left:71%;top:45%}
+  .yellow{background:var(--yellow);left:71%;top:45%}
+  .selected-glow{
+    position:absolute;width:115px;height:115px;border-radius:50%;left:19%;top:22%;
+    background:rgba(22,199,132,.12);box-shadow:0 0 55px rgba(22,199,132,.3);z-index:1
+  }
+  .mapcard{
+    position:absolute;right:20px;top:30px;width:345px;padding:27px;border-radius:13px;
+    background:rgba(27,27,29,.96);border:1px solid var(--border-default);z-index:5;
+  }
+  .mapcard h2{margin:0 0 7px;font-size:25px}.mapcard .place{color:var(--text-secondary);margin-bottom:19px}
+  .recommended{float:right;background:var(--accent);color:#111;padding:6px 10px;border-radius:6px;font-size:12px}
+  .info{border-top:1px solid var(--border-default);border-bottom:1px solid var(--border-default);padding:14px 0;margin:0 0 18px}
+  .info div{margin:10px 0;color:var(--text-secondary)}.info b{margin-left:8px;font-weight:500}
+  .estimate{color:var(--text-secondary);font-size:15px}.estimate strong{display:block;color:var(--text-primary);font-size:23px;margin-top:5px}
+  .primary{width:100%;border:0;border-radius:8px;background:var(--accent);color:#111;font-weight:700;padding:15px;margin-top:20px;box-shadow:0 8px 25px rgba(245,130,31,.18)}
+  .zoom{position:absolute;right:18px;bottom:15px;background:white;color:#17212b;border-radius:6px;overflow:hidden;z-index:6}
+  .zoom button{display:block;width:36px;height:34px;border:0;background:white;font-size:22px}
+  .zoom button+button{border-top:1px solid #ddd}
+  h3{font-size:17px;margin:31px 0 13px}
+  .list{display:flex;flex-direction:column;gap:1px}
+  .point{
+    min-height:106px;background:linear-gradient(90deg,var(--bg-field),var(--bg-card));border:1px solid var(--border-default);
+    padding:18px 20px;display:grid;grid-template-columns:1.5fr .9fr .8fr 90px;align-items:center;border-radius:10px;
+  }
+  .point + .point{border-top-left-radius:4px;border-top-right-radius:4px}
+  .pointname{display:flex;align-items:center;gap:18px}
+  .smallmarker{width:34px;height:42px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:grid;place-items:center;flex:none}
+  .smallmarker:after{content:"";width:12px;height:12px;background:#fff;border-radius:50%}
+  .point strong{font-size:17px}.point p{margin:4px 0 0;color:var(--text-secondary)}.reco{color:var(--accent);font-size:13px;margin-top:4px}
+  .meta{color:var(--text-secondary)}.meta small,.eta small{display:block;color:var(--text-muted);margin-top:7px}
+  .eta strong{font-size:16px}
+  .select{background:var(--accent);border:0;color:#111;border-radius:6px;padding:12px 18px;font-weight:700}
+  .empty-state{padding:24px 20px;border:1px solid var(--border-default);border-radius:10px;background:var(--bg-card);color:var(--text-secondary);text-align:center}
+  .notice{margin-top:19px;padding:17px 20px;border:1px solid var(--border-default);background:var(--bg-card);border-radius:10px;color:var(--text-secondary)}
+  .notice span{display:inline-grid;place-items:center;width:25px;height:25px;border-radius:50%;background:var(--accent);color:#111;margin-right:10px;font-weight:800}
+  .selected{outline:2px solid var(--accent);outline-offset:-2px}
+  @media(max-width:850px){
+    .app{padding:22px 16px}.icons{display:none}.subtitle{margin-left:0}
+    .searchrow{grid-template-columns:1fr}.mapcard{width:310px;right:10px}
+    .point{grid-template-columns:1fr;gap:12px}.point .select{width:100%}
+    .steps{grid-template-columns:1fr}.step{margin:8px 0}.step:after{display:none}
+  }
+
+  .theme-toggle{width:36px;height:36px;border:1px solid var(--border);border-radius:50%;background:var(--panel);color:var(--text);cursor:pointer}
+  .theme-toggle .icon-moon{display:none}
+  [data-theme="light"]{
+    --bg-page:#ffffff;
+    --bg-card:#ffffff;
+    --bg-field:#f2f2f2;
+    --border-default:#d0d0d0;
+    --text-primary:#000000;
+    --text-secondary:#333333;
+    --text-muted:#666666;
+    --bg:#ffffff;
+    --panel:#ffffff;
+    --panel2:#f2f2f2;
+    --border:#d0d0d0;
+    --text:#000000;
+    --muted:#333333;
+  }
+  [data-theme="light"] body{background:#ffffff;color:#000000}
+  [data-theme="light"] .active{color:#000000}
+  [data-theme="light"] .theme-toggle .icon-sun{display:none}
+  [data-theme="light"] .theme-toggle .icon-moon{display:inline}
+  [data-theme="light"] .mapcard{background:rgba(255,255,255,.96);border-color:#d0d0d0}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <button class="back" aria-label="Back to checkout">←</button>
+    <h1>RankDrop Pickup Points</h1>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light and dark mode"><svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg><svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 1 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg></button>
+  </div>
+  <p class="subtitle">Choose a convenient RankDrop location to collect your order.</p>
+
+  <div class="steps">
+    <div class="step done"><span class="circle">✓</span><span>Order Confirmed</span></div>
+    <div class="step active"><span class="circle">2</span><span>Choose Pickup Point</span></div>
+    <div class="step"><span class="circle">3</span><span>Order Tracking</span></div>
+  </div>
+
+  <div class="searchrow">
+    <label class="searchbox"><span>⌕</span><input id="search" placeholder="Search pickup points..." /></label>
+    <button class="locationbtn" id="location">Use my location</button>
+  </div>
+
+  <div class="map" id="map">
+    <div class="selected-glow"></div>
+    <span class="maplabel m1">BELLVILLE</span><span class="maplabel m2">NYANGA</span>
+    <span class="maplabel m3">GUGULETHU</span><span class="maplabel m4">DELFT</span>
+    <span class="maplabel m5">PHILIPPI</span><span class="maplabel m6">KHAYELITSHA</span>
+    <span class="maplabel m7">MITCHELLS PLAIN</span><span class="maplabel m8">MITCHELLS PLAIN</span>
+
+    <span class="marker green"></span><span class="marker orange"></span>
+    <span class="marker purple"></span><span class="marker blue"></span><span class="marker blue-cape"></span><span class="marker blue-wyneberg"></span>
+
+    <div class="mapcard">
+      <span class="recommended">Recommended</span>
+      <h2 id="selectedTitle">Site B Rank</h2>
+      <div class="place" id="selectedPlace">Khayelitsha, Cape Town</div>
+      <div class="info">
+        <div>⌖ <b id="selectedDistance">1.2 km away</b></div>
+        <div>◷ <b id="selectedHours">Open 06:00 – 21:00</b></div>
+      </div>
+      <div class="estimate">Est. ready time<strong id="selectedEta">24 – 48 hours</strong></div>
+      <button class="primary" id="mainSelect">Select This Location</button>
+    </div>
+
+    <div class="zoom"><button id="plus">+</button><button id="minus">−</button></div>
+  </div>
+
+  <h3>Nearby Pickup Points</h3>
+  <div class="list" id="list"></div>
+
+  <div class="notice"><span>i</span>You’ll receive an SMS and WhatsApp when your parcel is ready for collection.</div>
+</div>
+
+<script src="sweetalert2.bundle.js"></script>
+<script>
+const themeToggle = document.getElementById("theme-toggle");
+const savedTheme = localStorage.getItem("localcart-theme");
+if(savedTheme === "light") document.documentElement.dataset.theme = "light";
+themeToggle.addEventListener("click",()=>{
+  const isLight = document.documentElement.dataset.theme === "light";
+  document.documentElement.dataset.theme = isLight ? "dark" : "light";
+  localStorage.setItem("localcart-theme", isLight ? "dark" : "light");
+});
+
+const points = [
+  {name:"Site B Rank",place:"Khayelitsha, Cape Town",distance:"1.2 km away",hours:"Open 06:00 – 21:00",eta:"24 – 48 hours",color:"green",recommended:true,lat:-34.039,lng:18.677},
+  {name:"Nyanga Junction",place:"Nyanga, Cape Town",distance:"3.6 km away",hours:"Open 06:00 – 20:00",eta:"24 – 48 hours",color:"orange",lat:-33.989,lng:18.584},
+  {name:"Mitchells Plain Rank",place:"Mitchells Plain, Cape Town",distance:"4.1 km away",hours:"Open 06:00 – 20:30",eta:"24 – 48 hours",color:"purple",lat:-34.050,lng:18.596},
+  {name:"Bellville Taxi Rank",place:"Bellville, Cape Town",distance:"8.8 km away",hours:"Open 05:30 – 22:00",eta:"24 – 48 hours",color:"blue",lat:-33.898,lng:18.629},
+  {name:"Cape Town Taxi Rank",place:"Cape Town, Cape Town",distance:"6.2 km away",hours:"Open 06:00 – 22:00",eta:"24 – 48 hours",color:"blue",lat:-33.924,lng:18.424},
+  {name:"Wyneberg Taxi Rank",place:"Wyneberg, Cape Town",distance:"2.9 km away",hours:"Open 08:00 – 21:00",eta:"24 – 48 hours",color:"blue",lat:-34.002,lng:18.466}
+];
+
+const list = document.getElementById("list");
+const search = document.getElementById("search");
+let selected = points[0];
+
+function render(items=points){
+  list.innerHTML = "";
+  if(items.length===0){
+    list.innerHTML = '<div class="empty-state">No pickup point found, try checking the list.</div>';
+    return;
+  }
+  items.forEach((p)=>{
+    const el=document.createElement("div");
+    el.className="point"+(p.name===selected.name?" selected":"");
+    el.innerHTML=`
+      <div class="pointname">
+        <span class="smallmarker ${p.color}"></span>
+        <div><strong>${p.name}</strong><p>${p.place}</p>${p.recommended?'<div class="reco">Recommended</div>':''}</div>
+      </div>
+      <div class="meta">${p.distance}<small>${p.hours}</small></div>
+      <div class="eta"><strong>${p.eta}</strong><small>Est. collection</small></div>
+      <button class="select">Select</button>`;
+    el.querySelector(".select").onclick=()=>choose(p);
+    el.onclick=(e)=>{if(!e.target.classList.contains("select")) choose(p)};
+    list.appendChild(el);
+  });
+}
+function choose(p){
+  selected=p;
+  document.getElementById("selectedTitle").textContent=p.name;
+  document.getElementById("selectedPlace").textContent=p.place;
+  document.getElementById("selectedDistance").textContent=p.distance;
+  document.getElementById("selectedHours").textContent=p.hours;
+  document.getElementById("selectedEta").textContent=p.eta;
+  render(points.filter(x=>x.name.toLowerCase().includes(search.value.toLowerCase())));
+}
+search.addEventListener("input",()=>{
+  const q=search.value.toLowerCase();
+  render(points.filter(p=>(p.name+" "+p.place).toLowerCase().includes(q)));
+});
+document.getElementById("mainSelect").onclick=()=>{
+  Swal.fire({
+    icon: "success",
+    title: "Pickup location selected",
+    text: selected.name,
+    background: "#1b1b1d",
+    color: "#f5f5f5",
+    confirmButtonColor: "#f5821f"
+  });
+};
+document.getElementById("location").onclick=()=>{
+  const noNearbyRank = () => Swal.fire({
+    icon: "info",
+    title: "No nearby rank found",
+    text: "We couldn't find a nearby pickup point. Please search the list manually.",
+    background: "#1b1b1d",
+    color: "#f5f5f5",
+    confirmButtonColor: "#f5821f"
+  });
+
+  if(!navigator.geolocation){noNearbyRank();return;}
+  navigator.geolocation.getCurrentPosition(
+    position=>{
+      const {latitude, longitude} = position.coords;
+      const nearest = points.reduce((closest, point)=>{
+        const distance = Math.hypot(latitude - point.lat, longitude - point.lng);
+        return distance < closest.distance ? {point, distance} : closest;
+      }, {point:null, distance:Infinity});
+
+      if(!nearest.point){noNearbyRank();return;}
+      choose(nearest.point);
+      Swal.fire({
+        icon: "success",
+        title: "Nearby rank found",
+        text: `${nearest.point.name} is your nearest pickup point.`,
+        background: "#1b1b1d",
+        color: "#f5f5f5",
+        confirmButtonColor: "#f5821f"
+      });
+    },
+    noNearbyRank
+  );
+};
+document.querySelector(".back").onclick=()=>{window.location.href="checkout.html"};
+let zoom=1;
+document.getElementById("plus").onclick=()=>{zoom=Math.min(1.2,zoom+.05);document.getElementById("map").style.backgroundSize=`${100*zoom}%`};
+document.getElementById("minus").onclick=()=>{zoom=Math.max(.85,zoom-.05);document.getElementById("map").style.backgroundSize=`${100*zoom}%`};
+render();
+</script>
+</body>
+</html>

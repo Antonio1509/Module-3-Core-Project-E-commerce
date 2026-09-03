@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalCart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="sweetalert2.bundle.js"></script>
+<style>
+  :root {
+    --bg-page: #0f0f10;
+    --bg-card: #1b1b1d;
+    --bg-field: #2a2a2d;
+    --border-default: #3a3a3d;
+    --text-primary: #f5f5f5;
+    --text-secondary: #9a9a9d;
+    --text-muted: #6f6f72;
+    --accent: #f5821f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-page);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 380px;
+    background: var(--bg-card);
+    border-radius: 24px;
+    padding: 40px 32px 32px;
+    border: 1px solid #232325;
+  }
+
+  .logo-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .logo-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    background: var(--accent-soft, rgba(106,92,255,0.14));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    color: #6a5cff;
+    flex-shrink: 0;
+  }
+
+  .logo-icon svg { width: 18px; height: 18px; }
+
+  .brand {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle { font-size: 14px; color: var(--text-secondary); }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .tab-btn {
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid var(--border-default);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 15px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .tab-btn.active { border-color: var(--accent); color: var(--accent); }
+
+  .field-label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+
+  .role-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .role-btn {
+    padding: 18px 12px;
+    border-radius: 14px;
+    border: 1px solid var(--border-default);
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .role-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--text-secondary);
+    transition: stroke 0.15s ease;
+  }
+
+  .role-btn span { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+
+  .role-btn.active { border-color: var(--accent); background: rgba(245, 130, 31, 0.06); }
+  .role-btn.active svg { stroke: var(--accent); }
+  .role-btn.active span { color: var(--accent); }
+
+  .form-group { margin-bottom: 20px; }
+
+  .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+
+  .label-row .field-label { margin-bottom: 0; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    margin-top: 4px;
+  }
+
+  .forgot-link { font-size: 13px; color: var(--accent); text-decoration: none; }
+  .forgot-link:hover { text-decoration: underline; }
+
+  input[type="email"],
+  input[type="password"],
+  input[type="text"],
+  input[type="tel"],
+  select {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg-field);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s ease;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239a9a9d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  select:invalid { color: var(--text-muted); }
+  select option { color: var(--text-primary); background: var(--bg-field); }
+  input::placeholder { color: var(--text-muted); }
+  input:focus, select:focus { border-color: var(--accent); }
+
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    background: #f5f5f5;
+    color: #111;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 4px;
+    margin-bottom: 20px;
+    transition: opacity 0.15s ease;
+  }
+
+  .submit-btn:hover { opacity: 0.9; }
+  .submit-btn:active { transform: scale(0.99); }
+
+  .switch-row { text-align: center; font-size: 14px; color: var(--text-secondary); }
+  .switch-row button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .switch-row button:hover { text-decoration: underline; }
+
+  input:focus-visible, select:focus-visible, button:focus-visible, a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .password-wrapper {
+    position: relative;
+  }
+
+  .password-wrapper input {
+    padding-right: 46px;
+  }
+
+  .toggle-password {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+
+  .toggle-password svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--text-secondary);
+    transition: stroke 0.15s ease;
+  }
+
+  .toggle-password:hover svg { stroke: var(--text-primary); }
+
+  .hidden { display: none; }
+
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-default);
+    border-radius: 50%;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+
+  .theme-toggle .icon-moon { display: none; }
+
+  [data-theme="light"] {
+    --bg-page: #ffffff;
+    --bg-card: #ffffff;
+    --bg-field: #f2f2f2;
+    --border-default: #d0d0d0;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --text-muted: #666666;
+  }
+
+  [data-theme="light"] .card { border-color: var(--border-default); }
+  [data-theme="light"] .submit-btn { background: #000000; color: #ffffff; }
+  [data-theme="light"] .theme-toggle .icon-sun { display: none; }
+  [data-theme="light"] .theme-toggle .icon-moon { display: inline; }
+
+  @media (max-width: 420px) {
+    .card { padding: 32px 22px 24px; border-radius: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light and dark mode">
+  <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
+  <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg>
+</button>
+
+<div class="card">
+
+  <div class="logo-row">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+        <path d="M3 6h18"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+    </div>
+    <div class="brand">LocalCart</div>
+    <div class="subtitle" id="subtitleText">Welcome back</div>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="tab-btn active" id="tabLogin">Log In</button>
+    <button type="button" class="tab-btn" id="tabRegister">Register</button>
+  </div>
+
+  <!-- ============ LOGIN VIEW ============ -->
+  <div id="loginView">
+
+    <label class="field-label">I am logging in as a</label>
+    <div class="role-row">
+      <button type="button" class="role-btn active login-role" data-role="customer">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+        </svg>
+        <span>Customer</span>
+      </button>
+      <button type="button" class="role-btn login-role" data-role="vendor">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9 4 4h16l1 5"/>
+          <path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/>
+          <path d="M9 20v-6h6v6"/>
+          <path d="M3 9h18"/>
+        </svg>
+        <span>Vendor</span>
+      </button>
+    </div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="field-label" for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="name@example.com" required>
+      </div>
+      <div class="form-group">
+        <div class="label-row">
+          <label class="field-label" for="loginPassword">Password</label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
+        <div class="password-wrapper">
+          <input type="password" id="loginPassword" placeholder="Enter your password" required>
+          <button type="button" class="toggle-password" data-target="loginPassword" aria-label="Show password">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="submit-btn">Log in</button>
+    </form>
+
+    <div class="switch-row">
+      Don't have an account? <button type="button" id="goToRegister">Sign up</button>
+    </div>
+  </div>
+
+  <!-- ============ REGISTER VIEW ============ -->
+  <div id="registerView" class="hidden">
+
+    <label class="field-label">I am registering as a</label>
+    <div class="role-row">
+      <button type="button" class="role-btn active register-role" data-role="customer">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>
+        </svg>
+        <span>Customer</span>
+      </button>
+      <button type="button" class="role-btn register-role" data-role="vendor">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9 4 4h16l1 5"/>
+          <path d="M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9"/>
+          <path d="M9 20v-6h6v6"/>
+          <path d="M3 9h18"/>
+        </svg>
+        <span>Vendor</span>
+      </button>
+    </div>
+
+    <form id="registerForm">
+
+      <div id="customerFields">
+        <div class="form-group">
+          <label class="field-label" for="custFullName">Full name</label>
+          <input type="text" id="custFullName" placeholder="Thandiwe Mkhize" required>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="custUsername">Username</label>
+          <input type="text" id="custUsername" placeholder="Choose a username" required>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="custEmail">Email</label>
+          <input type="email" id="custEmail" placeholder="name@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="custPhone">Phone number</label>
+          <input type="tel" id="custPhone" placeholder="082 456 7890" required>
+        </div>
+
+        <div class="section-label">Physical address</div>
+        <div class="form-group">
+          <label class="field-label" for="custStreet">Street &amp; house number</label>
+          <input type="text" id="custStreet" placeholder="12 Vygieboom Street" required>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="custSuburb">Suburb</label>
+          <input type="text" id="custSuburb" placeholder="e.g. Khayelitsha" required>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="custCity">City</label>
+          <input type="text" id="custCity" placeholder="e.g. Cape Town" required>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="custProvince">Province</label>
+          <select id="custProvince" required>
+            <option value="" disabled selected>Select province</option>
+            <option>Western Cape</option>
+            <option>Eastern Cape</option>
+            <option>Northern Cape</option>
+            <option>Free State</option>
+            <option>Gauteng</option>
+            <option>KwaZulu-Natal</option>
+            <option>Limpopo</option>
+            <option>Mpumalanga</option>
+            <option>North West</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="custPostalCode">Postal code</label>
+          <input type="text" id="custPostalCode" placeholder="7784" inputmode="numeric" required>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="custGender">Gender</label>
+          <select id="custGender" required>
+            <option value="" disabled selected>Select gender</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="nonbinary">Non-binary</option>
+            <option value="prefer-not-to-say">Prefer not to say</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="custPassword">Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="custPassword" placeholder="Create a password" required>
+            <button type="button" class="toggle-password" data-target="custPassword" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="custConfirmPassword">Confirm password</label>
+          <div class="password-wrapper">
+            <input type="password" id="custConfirmPassword" placeholder="Re-enter your password" required>
+            <button type="button" class="toggle-password" data-target="custConfirmPassword" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="vendorFields" class="hidden">
+        <div class="form-group">
+          <label class="field-label" for="vendStoreName">Store name</label>
+          <input type="text" id="vendStoreName" placeholder="e.g. Mzansi Fresh Produce">
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendStoreEmail">Store email</label>
+          <input type="email" id="vendStoreEmail" placeholder="store@example.com">
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendStorePhone">Store telephone number</label>
+          <input type="tel" id="vendStorePhone" placeholder="021 456 7890">
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendOwnerId">Store owner ID number</label>
+          <input type="text" id="vendOwnerId" placeholder="13-digit ID number">
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendOwnerName">Store owner full name</label>
+          <input type="text" id="vendOwnerName" placeholder="Full name of store owner">
+        </div>
+
+        <div class="section-label">Store owner physical address</div>
+        <div class="form-group">
+          <label class="field-label" for="vendStreet">Street &amp; house number</label>
+          <input type="text" id="vendStreet" placeholder="12 Vygieboom Street">
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendSuburb">Suburb</label>
+          <input type="text" id="vendSuburb" placeholder="e.g. Khayelitsha">
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendCity">City</label>
+          <input type="text" id="vendCity" placeholder="e.g. Cape Town">
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendProvince">Province</label>
+          <select id="vendProvince">
+            <option value="" disabled selected>Select province</option>
+            <option>Western Cape</option>
+            <option>Eastern Cape</option>
+            <option>Northern Cape</option>
+            <option>Free State</option>
+            <option>Gauteng</option>
+            <option>KwaZulu-Natal</option>
+            <option>Limpopo</option>
+            <option>Mpumalanga</option>
+            <option>North West</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendPostalCode">Postal code</label>
+          <input type="text" id="vendPostalCode" placeholder="7784" inputmode="numeric">
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendPassword">Password</label>
+          <div class="password-wrapper">
+            <input type="password" id="vendPassword" placeholder="Create a password">
+            <button type="button" class="toggle-password" data-target="vendPassword" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="field-label" for="vendConfirmPassword">Confirm password</label>
+          <div class="password-wrapper">
+            <input type="password" id="vendConfirmPassword" placeholder="Re-enter your password">
+            <button type="button" class="toggle-password" data-target="vendConfirmPassword" aria-label="Show password">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">Register</button>
+    </form>
+
+    <div class="switch-row">
+      Already have an account? <button type="button" id="goToLogin">Log in</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const themeToggle = document.getElementById('theme-toggle');
+  const savedTheme = localStorage.getItem('localcart-theme');
+  if (savedTheme === 'light') document.documentElement.dataset.theme = 'light';
+  themeToggle.addEventListener('click', () => {
+    const isLight = document.documentElement.dataset.theme === 'light';
+    document.documentElement.dataset.theme = isLight ? 'dark' : 'light';
+    localStorage.setItem('localcart-theme', isLight ? 'dark' : 'light');
+  });
+
+  const tabLogin = document.getElementById('tabLogin');
+  const tabRegister = document.getElementById('tabRegister');
+  const loginView = document.getElementById('loginView');
+  const registerView = document.getElementById('registerView');
+  const subtitleText = document.getElementById('subtitleText');
+
+  function showLogin() {
+    tabLogin.classList.add('active');
+    tabRegister.classList.remove('active');
+    loginView.classList.remove('hidden');
+    registerView.classList.add('hidden');
+    subtitleText.textContent = 'Welcome back';
+  }
+
+  function showRegister() {
+    tabRegister.classList.add('active');
+    tabLogin.classList.remove('active');
+    registerView.classList.remove('hidden');
+    loginView.classList.add('hidden');
+    subtitleText.textContent = 'Create your account';
+  }
+
+  tabLogin.addEventListener('click', showLogin);
+  tabRegister.addEventListener('click', showRegister);
+  document.getElementById('goToRegister').addEventListener('click', showRegister);
+  document.getElementById('goToLogin').addEventListener('click', showLogin);
+
+  // Login role toggle (visual only — doesn't change fields)
+  document.querySelectorAll('.login-role').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.login-role').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Register role toggle — swaps field sets and required-ness
+  const customerFields = document.getElementById('customerFields');
+  const vendorFields = document.getElementById('vendorFields');
+
+  function setRequired(container, isRequired) {
+    container.querySelectorAll('input, select').forEach(el => el.required = isRequired);
+  }
+
+  document.querySelectorAll('.register-role').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.register-role').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (btn.dataset.role === 'vendor') {
+        vendorFields.classList.remove('hidden');
+        customerFields.classList.add('hidden');
+        setRequired(vendorFields, true);
+        setRequired(customerFields, false);
+      } else {
+        customerFields.classList.remove('hidden');
+        vendorFields.classList.add('hidden');
+        setRequired(customerFields, true);
+        setRequired(vendorFields, false);
+      }
+    });
+  });
+
+  // Show/hide password toggles — works for login, customer, and vendor fields
+  const eyeOpen = `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>`;
+  const eyeClosed = `<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.6 19.6 0 0 1 4.22-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a19.6 19.6 0 0 1-2.16 3.19M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>`;
+
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      const svg = btn.querySelector('svg');
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      svg.innerHTML = isHidden ? eyeClosed : eyeOpen;
+      btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    });
+  });
+
+  // In-memory "database" of registered accounts for this session.
+  // Note: this resets on page reload since nothing is persisted to
+  // a real backend yet — swap this out once you have one.
+  const registeredUsers = [];
+
+  // Safe wrapper: if the local SweetAlert2 script failed to load,
+  // this falls back to a plain browser alert instead of failing silently.
+  function showAlert({ icon, title, text }) {
+    if (typeof Swal !== 'undefined') {
+      return Swal.fire({
+        icon,
+        title,
+        text,
+        background: '#1b1b1d',
+        color: '#f5f5f5',
+        confirmButtonColor: '#f5821f'
+      });
+    } else {
+      console.warn('SweetAlert2 not loaded — falling back to native alert().');
+      alert(`${title}\n\n${text}`);
+      return Promise.resolve();
+    }
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const role = document.querySelector('.login-role.active').dataset.role;
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+    const password = document.getElementById('loginPassword').value;
+
+    const match = registeredUsers.find(
+      user => user.email.toLowerCase() === email && user.password === password
+    );
+
+    if (!match) {
+      showAlert({
+        icon: 'error',
+        title: 'Login failed',
+        text: 'Incorrect username or password.'
+      });
+      return;
+    }
+
+    console.log('Login attempt:', { role, email });
+    showAlert({
+      icon: 'success',
+      title: 'Logged in!',
+      text: `Welcome back, logging in as ${role}.`
+    }).then(() => {
+      window.location.href = role === 'vendor'
+        ? 'vendor-dashboard.html'
+        : 'index.html';
+    });
+  });
+
+  document.getElementById('registerForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    try {
+      const isVendor = document.querySelector('.register-role.active').dataset.role === 'vendor';
+
+      if (isVendor) {
+        const password = document.getElementById('vendPassword').value;
+        const confirmPassword = document.getElementById('vendConfirmPassword').value;
+
+        if (password !== confirmPassword) {
+          showAlert({
+            icon: 'error',
+            title: 'Passwords don\'t match',
+            text: 'Please make sure both password fields are identical.'
+          });
+          return;
+        }
+
+        const data = {
+          role: 'Vendor',
+          storeName: document.getElementById('vendStoreName').value,
+          email: document.getElementById('vendStoreEmail').value,
+          storePhone: document.getElementById('vendStorePhone').value,
+          ownerId: document.getElementById('vendOwnerId').value,
+          ownerName: document.getElementById('vendOwnerName').value,
+          street: document.getElementById('vendStreet').value,
+          suburb: document.getElementById('vendSuburb').value,
+          city: document.getElementById('vendCity').value,
+          province: document.getElementById('vendProvince').value,
+          postalCode: document.getElementById('vendPostalCode').value,
+          password: password
+        };
+        console.log('Register attempt:', data);
+        registeredUsers.push({ email: data.email, password: data.password, role: 'vendor' });
+        showAlert({
+          icon: 'success',
+          title: 'Vendor account created!',
+          text: `Welcome to LocalCart, ${data.storeName}. You can now log in.`
+        });
+      } else {
+        const password = document.getElementById('custPassword').value;
+        const confirmPassword = document.getElementById('custConfirmPassword').value;
+
+        if (password !== confirmPassword) {
+          showAlert({
+            icon: 'error',
+            title: 'Passwords don\'t match',
+            text: 'Please make sure both password fields are identical.'
+          });
+          return;
+        }
+
+        const data = {
+          role: 'Customer',
+          fullName: document.getElementById('custFullName').value,
+          username: document.getElementById('custUsername').value,
+          email: document.getElementById('custEmail').value,
+          phone: document.getElementById('custPhone').value,
+          street: document.getElementById('custStreet').value,
+          suburb: document.getElementById('custSuburb').value,
+          city: document.getElementById('custCity').value,
+          province: document.getElementById('custProvince').value,
+          postalCode: document.getElementById('custPostalCode').value,
+          gender: document.getElementById('custGender').value,
+          password: password
+        };
+        console.log('Register attempt:', data);
+        registeredUsers.push({ email: data.email, password: data.password, role: 'customer' });
+        showAlert({
+          icon: 'success',
+          title: 'Account created!',
+          text: `Welcome to LocalCart, ${data.fullName}. You can now log in.`
+        });
+      }
+    } catch (err) {
+      console.error('Register handler error:', err);
+      showAlert({
+        icon: 'error',
+        title: 'Something went wrong',
+        text: 'Please check that every field is filled in and try again.'
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
