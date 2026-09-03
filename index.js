@@ -125,6 +125,7 @@ function updateAllUserUI(user) {
   updateWelcomeMessage(user);
   updateUserName(user);
   updateLogoutButton(user);
+  updateProfileDropdown(user);
 }
 
 function updateAvatar(user) {
@@ -214,6 +215,16 @@ function updateLogoutButton(user) {
   }
 }
 
+function updateProfileDropdown(user) {
+  const profileName = document.querySelector('[data-profile-name]');
+  const profileEmail = document.querySelector('[data-profile-email]');
+  
+  if (user) {
+    if (profileName) profileName.textContent = user.name || 'User';
+    if (profileEmail) profileEmail.textContent = user.email || 'user@example.com';
+  }
+}
+
 /* ===========================================================
    DOM CONTENT LOADED
    =========================================================== */
@@ -239,6 +250,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initDashboardButtons();
   initCartButton();
   initLoginRedirect();
+  initProfileDropdown();
+  initVendorSearch(); // New function for vendor search
 });
 
 /* ---------------------------------------------------------
@@ -274,6 +287,39 @@ function initThemeToggle() {
     root.setAttribute('data-theme', next);
     try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* ignore */ }
   });
+}
+
+/* ---------------------------------------------------------
+   Profile Dropdown
+--------------------------------------------------------- */
+function initProfileDropdown() {
+  const toggle = document.getElementById('profile-toggle');
+  const dropdown = document.getElementById('profile-dropdown');
+  
+  if (!toggle || !dropdown) return;
+  
+  toggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const isOpen = dropdown.classList.contains('open');
+    dropdown.classList.toggle('open');
+    this.setAttribute('aria-expanded', !isOpen);
+  });
+  
+  document.addEventListener('click', function(e) {
+    if (!dropdown.contains(e.target) && !toggle.contains(e.target)) {
+      dropdown.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+  
+  // Logout handler
+  const logoutBtn = dropdown.querySelector('.logout-link');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      logoutUser();
+    });
+  }
 }
 
 /* ---------------------------------------------------------
@@ -435,7 +481,16 @@ function initAddProductForm() {
 
   function showToast(title, message, type = 'success') {
     const container = document.getElementById('toast-container');
-    if (!container) return;
+    if (!container) {
+      // Create toast container if it doesn't exist
+      const newContainer = document.createElement('div');
+      newContainer.className = 'toast-container';
+      newContainer.id = 'toast-container';
+      document.body.appendChild(newContainer);
+    }
+    const toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) return;
+    
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     const icon = type === 'success' ? '✓' : '✕';
@@ -447,7 +502,7 @@ function initAddProductForm() {
       </div>
       <button class="toast-close">×</button>
     `;
-    container.appendChild(toast);
+    toastContainer.appendChild(toast);
 
     toast.querySelector('.toast-close').addEventListener('click', () => {
       toast.remove();
@@ -572,7 +627,7 @@ function initBrowseButton() {
 }
 
 /* ---------------------------------------------------------
-   Search box
+   Search box — Main search
 --------------------------------------------------------- */
 function initSearch() {
   const input = document.getElementById('search-input');
@@ -581,6 +636,7 @@ function initSearch() {
   const productsGrid = document.getElementById('products-grid');
 
   if (!productsGrid) {
+    // Not the shop page — Enter redirects to the shop with the query.
     input.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;
       e.preventDefault();
@@ -591,6 +647,7 @@ function initSearch() {
     return;
   }
 
+  // Shop page: live filtering.
   const state = { searchTerm: '', activeCategory: null };
 
   const params = new URLSearchParams(window.location.search);
@@ -614,6 +671,48 @@ function initSearch() {
 
   window.__localcartFilterState = state;
   applyFilters(state);
+}
+
+/* ---------------------------------------------------------
+   Vendor Search — For vendors.html page
+--------------------------------------------------------- */
+function initVendorSearch() {
+  const vendorSearch = document.getElementById('vendor-search');
+  if (!vendorSearch) return;
+
+  vendorSearch.addEventListener('input', function() {
+    const term = this.value.trim().toLowerCase();
+    filterVendors(term);
+  });
+
+  vendorSearch.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const term = vendorSearch.value.trim();
+      if (term) recordSearch(term);
+    }
+  });
+}
+
+function filterVendors(searchTerm) {
+  const vendorCards = document.querySelectorAll('.vendor-card');
+  const noResults = document.getElementById('no-vendors');
+  let visibleCount = 0;
+
+  vendorCards.forEach((card) => {
+    const name = (card.dataset.vendorName || '').toLowerCase();
+    const category = (card.dataset.vendorCategory || '').toLowerCase();
+    const description = (card.dataset.vendorDescription || '').toLowerCase();
+    const searchable = `${name} ${category} ${description}`;
+    const matches = !searchTerm || searchable.includes(searchTerm);
+    
+    card.style.display = matches ? '' : 'none';
+    if (matches) visibleCount++;
+  });
+
+  if (noResults) {
+    noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+  }
 }
 
 /* ---------------------------------------------------------
