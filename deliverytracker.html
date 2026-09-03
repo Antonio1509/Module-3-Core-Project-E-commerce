@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>LocalCart - RankDrop Shipments</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--page: #0f0f10;
+			--card: #1b1b1d;
+			--card-soft: #202023;
+			--field: #2a2a2d;
+			--border: #303034;
+			--text: #f5f5f5;
+			--muted: #9a9a9d;
+			--faint: #6f6f72;
+			--accent: #f5821f;
+			--green: #36c978;
+			--blue: #4d91ff;
+			--purple: #9b72df;
+		}
+
+		* {
+			box-sizing: border-box;
+		}
+
+		body {
+			margin: 0;
+			min-height: 100vh;
+			background: var(--page);
+			color: var(--text);
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+		}
+
+		button,
+		input,
+		select {
+			font: inherit;
+		}
+
+		button {
+			cursor: pointer;
+		}
+
+		.main {
+			width: min(100%, 1120px);
+			margin: 0 auto;
+			padding: 30px 34px 50px;
+		}
+
+		.topbar {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 20px;
+			margin-bottom: 28px;
+		}
+
+		.heading-group {
+			display: flex;
+			align-items: center;
+			gap: 18px;
+		}
+
+		.back {
+			width: 48px;
+			height: 48px;
+			border: 1px solid var(--border);
+			border-radius: 50%;
+			background: var(--field);
+			color: var(--text);
+			font-size: 27px;
+			line-height: 1;
+		}
+
+		.back:hover {
+			border-color: var(--accent);
+			color: var(--accent);
+		}
+
+		h1 {
+			margin: 0 0 7px;
+			font-size: 25px;
+			letter-spacing: -0.5px;
+		}
+
+		.intro {
+			margin: 0;
+			color: var(--muted);
+			font-size: 12px;
+		}
+
+		.period {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			padding: 9px 11px;
+			border: 1px solid var(--border);
+			border-radius: 7px;
+			background: var(--card);
+			color: var(--text);
+			font-size: 12px;
+		}
+
+		.period select {
+			border: 0;
+			outline: 0;
+			background: transparent;
+			color: inherit;
+			font-size: 12px;
+		}
+
+		.tabs {
+			display: flex;
+			gap: 25px;
+			border-bottom: 1px solid var(--border);
+			margin-bottom: 14px;
+			overflow-x: auto;
+		}
+
+		.tab {
+			padding: 0 2px 12px;
+			border: 0;
+			border-bottom: 2px solid transparent;
+			background: transparent;
+			color: var(--muted);
+			font-size: 11px;
+			white-space: nowrap;
+		}
+
+		.tab.active,
+		.tab:hover {
+			border-color: var(--accent);
+			color: var(--text);
+		}
+
+		.toolbar {
+			display: flex;
+			gap: 10px;
+			margin-bottom: 16px;
+		}
+
+		.search {
+			display: flex;
+			align-items: center;
+			gap: 9px;
+			flex: 1;
+			height: 38px;
+			padding: 0 12px;
+			border: 1px solid var(--border);
+			border-radius: 7px;
+			background: var(--field);
+			color: var(--muted);
+		}
+
+		.search input {
+			width: 100%;
+			border: 0;
+			outline: 0;
+			background: transparent;
+			color: var(--text);
+			font-size: 11px;
+		}
+
+		.search input::placeholder {
+			color: var(--muted);
+		}
+
+		.filter,
+		.action {
+			height: 38px;
+			padding: 0 14px;
+			border: 1px solid var(--border);
+			border-radius: 7px;
+			background: var(--card);
+			color: var(--text);
+			font-size: 11px;
+		}
+
+		.filter:hover,
+		.action:hover {
+			border-color: var(--accent);
+		}
+
+		.table-panel {
+			overflow: hidden;
+			border: 1px solid var(--border);
+			border-radius: 9px;
+			background: linear-gradient(145deg, var(--card-soft), var(--card));
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 10px;
+		}
+
+		th,
+		td {
+			padding: 14px 12px;
+			border-bottom: 1px solid #2a2a2d;
+			text-align: left;
+			vertical-align: middle;
+		}
+
+		th {
+			color: var(--muted);
+			font-size: 9px;
+			font-weight: 500;
+		}
+
+		tbody tr:hover {
+			background: rgba(245, 130, 31, 0.04);
+		}
+
+		tbody tr:last-child td {
+			border-bottom: 0;
+		}
+
+		.parcel {
+			font-weight: 700;
+		}
+
+		.pickup {
+			max-width: 105px;
+			line-height: 1.45;
+		}
+
+		.status {
+			display: inline-block;
+			padding: 4px 6px;
+			border-radius: 4px;
+			font-size: 9px;
+			font-weight: 600;
+			white-space: nowrap;
+		}
+
+		.collected {
+			background: rgba(54, 201, 120, 0.13);
+			color: var(--green);
+		}
+
+		.processing,
+		.transit {
+			background: rgba(77, 145, 255, 0.14);
+			color: var(--blue);
+		}
+
+		.at-rank {
+			background: rgba(245, 130, 31, 0.14);
+			color: var(--accent);
+		}
+
+		.delivered {
+			background: rgba(155, 114, 223, 0.14);
+			color: var(--purple);
+		}
+
+		.empty {
+			padding: 32px;
+			color: var(--muted);
+			text-align: center;
+		}
+
+		.footer-row {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			padding: 14px 12px;
+			color: var(--muted);
+			font-size: 10px;
+		}
+
+		.pagination {
+			display: flex;
+			align-items: center;
+			gap: 14px;
+		}
+
+		.page-button {
+			width: 24px;
+			height: 24px;
+			border: 1px solid transparent;
+			border-radius: 5px;
+			background: transparent;
+			color: var(--text);
+			font-size: 10px;
+		}
+
+		.page-button.active,
+		.page-button:hover {
+			border-color: var(--accent);
+			color: var(--accent);
+		}
+
+		.actions {
+			display: flex;
+			gap: 12px;
+			margin-top: 20px;
+		}
+
+		.action.primary {
+			border-color: var(--accent);
+			background: var(--accent);
+			color: #111;
+			font-weight: 700;
+		}
+
+		.action.primary:hover {
+			opacity: 0.85;
+		}
+
+		@media (max-width: 700px) {
+			.main {
+				padding: 24px 16px 40px;
+			}
+
+			.topbar {
+				align-items: stretch;
+				flex-direction: column;
+			}
+
+			.period {
+				align-self: flex-start;
+			}
+
+			.toolbar {
+				flex-direction: column;
+			}
+
+			.filter {
+				align-self: flex-start;
+			}
+
+			.table-panel {
+				overflow-x: auto;
+			}
+
+			table {
+				min-width: 700px;
+			}
+
+			.actions {
+				flex-wrap: wrap;
+			}
+		}
+
+		.theme-toggle {
+			width: 36px;
+			height: 36px;
+			border: 1px solid var(--border);
+			border-radius: 50%;
+			background: var(--card);
+			color: var(--text);
+			cursor: pointer;
+		}
+
+		.theme-toggle .icon-moon { display: none; }
+
+		[data-theme="light"] {
+			--page: #ffffff;
+			--card: #ffffff;
+			--card-soft: #fafafa;
+			--field: #f2f2f2;
+			--border: #d0d0d0;
+			--text: #000000;
+			--muted: #333333;
+			--faint: #666666;
+		}
+
+		[data-theme="light"] th,
+		[data-theme="light"] td { border-bottom-color: #e0e0e0; }
+		[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+		[data-theme="light"] .theme-toggle .icon-moon { display: inline; }
+	</style>
+</head>
+<body>
+	<main class="main">
+		<header class="topbar">
+			<div class="heading-group">
+				<button class="back" type="button" aria-label="Back to Vendors Dashboard">←</button>
+				<div><h1>RankDrop Shipments</h1><p class="intro">Manage and track all your RankDrop parcels.</p></div>
+			</div>
+			<label class="period">This Month <select id="period"><option>This Month</option><option>Last Month</option><option>This Year</option></select></label>
+			<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light and dark mode"><svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg><svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg></button>
+		</header>
+
+		<nav class="tabs" aria-label="Shipment statuses">
+			<button class="tab active" data-status="All">All</button><button class="tab" data-status="Processing">Processing</button><button class="tab" data-status="In Transit">In Transit</button><button class="tab" data-status="At Rank">At Rank</button><button class="tab" data-status="Collected">Collected</button><button class="tab" data-status="Delivered">Returned</button>
+		</nav>
+
+		<section class="toolbar" aria-label="Shipment filters">
+			<label class="search">⌕ <input id="search" type="search" placeholder="Search shipments..." aria-label="Search shipments"></label>
+			<button class="filter" id="filterButton" type="button">☷ &nbsp; Filter</button>
+		</section>
+
+		<section class="table-panel">
+			<table>
+				<thead><tr><th>Parcel ID</th><th>Order</th><th>Pickup Point</th><th>Status</th><th>Collection Code</th><th>Date</th></tr></thead>
+				<tbody id="shipmentRows"></tbody>
+			</table>
+			<div class="footer-row"><span id="resultCount"></span><div class="pagination" id="pagination"></div></div>
+		</section>
+
+		<div class="actions"><button class="action primary" id="create" type="button">Create Shipment</button></div>
+	</main>
+	<script src="sweetalert2.bundle.js"></script>
+	<script>
+		const themeToggle = document.getElementById('theme-toggle');
+		const savedTheme = localStorage.getItem('localcart-theme');
+		if (savedTheme === 'light') document.documentElement.dataset.theme = 'light';
+		themeToggle.addEventListener('click', () => {
+			const isLight = document.documentElement.dataset.theme === 'light';
+			document.documentElement.dataset.theme = isLight ? 'dark' : 'light';
+			localStorage.setItem('localcart-theme', isLight ? 'dark' : 'light');
+		});
+
+		const shipments = [
+			{ id:'RD-1045', order:'#1045', point:'Site B Rank', status:'Collected', code:'2841', date:'29 May 2024' },
+			{ id:'RD-1044', order:'#1044', point:'Mitchells Plain Rank', status:'At Rank', code:'6712', date:'29 May 2024' },
+			{ id:'RD-1043', order:'#1043', point:'Nyanga Junction', status:'In Transit', code:'9931', date:'29 May 2024' },
+			{ id:'RD-1042', order:'#1042', point:'Bellville Taxi Rank', status:'Collected', code:'4452', date:'28 May 2024' },
+			{ id:'RD-1041', order:'#1041', point:'14 Main Rd, Claremont', status:'Delivered', code:'–', date:'28 May 2024' },
+			{ id:'RD-1039', order:'#1040', point:'Khayelitsha Mall', status:'At Rank', code:'8210', date:'28 May 2024' },
+			{ id:'RD-1039', order:'#1039', point:'Site B Rank', status:'Processing', code:'–', date:'28 May 2024' },
+			{ id:'RD-1038', order:'#1038', point:'Nyanga Junction', status:'Collected', code:'3321', date:'28 May 2024' },
+			{ id:'RD-1037', order:'#1037', point:'Mitchells Plain Rank', status:'In Transit', code:'7762', date:'28 May 2024' },
+			{ id:'RD-1036', order:'#1036', point:'Site B Rank', status:'Collected', code:'1103', date:'27 May 2024' }
+		];
+		const trackedShipmentsKey = 'localcart-tracked-shipments';
+		const savedShipments = JSON.parse(localStorage.getItem(trackedShipmentsKey) || '[]').map(item => ({
+			id: item.id,
+			order: item.order,
+			point: item.point,
+			status: 'Processing',
+			code: item.code || '–',
+			date: item.date
+		}));
+		shipments.unshift(...savedShipments.filter(saved => !shipments.some(item => item.order === saved.order)));
+		const rows = document.getElementById('shipmentRows');
+		const search = document.getElementById('search');
+		let activeStatus = 'All';
+		function showAlert(title, text, icon = 'info') {
+			if (typeof Swal !== 'undefined') Swal.fire({ icon, title, text, background:'#1b1b1d', color:'#f5f5f5', confirmButtonColor:'#f5821f' });
+			else alert(`${title}\n\n${text}`);
+		}
+		function statusClass(status) { return status.toLowerCase().replace(' ', '-'); }
+		function render() {
+			const query = search.value.trim().toLowerCase();
+			const filtered = shipments.filter(item => (activeStatus === 'All' || item.status === activeStatus) && `${item.id} ${item.order} ${item.point} ${item.status}`.toLowerCase().includes(query));
+			rows.innerHTML = filtered.length ? filtered.map(item => `<tr><td class="parcel">${item.id}</td><td>${item.order}</td><td class="pickup">${item.point}</td><td><span class="status ${statusClass(item.status)}">${item.status}</span></td><td>${item.code}</td><td>${item.date}⌄</td></tr>`).join('') : '<tr><td class="empty" colspan="6">No shipments match your search.</td></tr>';
+			document.getElementById('resultCount').textContent = `Showing ${filtered.length ? 1 : 0} to ${filtered.length} of 142 shipments`;
+			document.getElementById('pagination').innerHTML = '<button class="page-button" type="button">‹</button><button class="page-button active" type="button">1</button><button class="page-button" type="button">2</button><button class="page-button" type="button">3</button><span>...</span><button class="page-button" type="button">15</button><button class="page-button" type="button">›</button>';
+		}
+		document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => { document.querySelector('.tab.active').classList.remove('active'); tab.classList.add('active'); activeStatus = tab.dataset.status; render(); }));
+		search.addEventListener('input', render);
+		document.querySelector('.back').addEventListener('click', () => { window.location.href = 'vendor-dashboard.html'; });
+		document.getElementById('period').addEventListener('change', event => showAlert('Date range updated', `Showing shipments for ${event.target.value}.`));
+		document.getElementById('filterButton').addEventListener('click', () => showAlert('Filters', 'Use the status tabs or search field to narrow the shipment list.'));
+		document.getElementById('create').addEventListener('click', () => { window.location.href = 'createshipment.html'; });
+		render();
+	</script>
+</body>
+</html>
