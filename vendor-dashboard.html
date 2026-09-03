@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LocalCart for Vendors — Dashboard</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span class="logo-mark">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+          <path d="M3 6h18"></path>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+      </span>
+      LocalCart <span class="logo-tag">for Vendors</span>
+    </div>
+
+    <nav>
+      <a href="vendor-dashboard.html" class="active">Dashboard</a>
+      <a href="vendor-dashboard.html">Products</a>
+      <a href="deliverytracker.html">Orders</a>
+      <a href="subscribe.html">Subscribe</a>
+    </nav>
+
+    <div class="header-right">
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
+        <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+        </svg>
+      </button>
+
+      <span class="vendor-name">Maya's Kitchen</span>
+      <div class="avatar">M</div>
+    </div>
+  </header>
+
+  <main class="vendor-main">
+    <div class="vendor-page-head">
+      <div>
+        <h1>Welcome back, Maya's Kitchen</h1>
+        <p>Here's how your shop is doing</p>
+      </div>
+      <button class="btn-primary" id="add-product-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        Add product
+      </button>
+    </div>
+
+    <div class="vendor-stats">
+      <div class="vendor-stat-card">
+        <div class="vendor-stat-label">Sales this month</div>
+        <div class="vendor-stat-value accent">R4,280</div>
+      </div>
+      <div class="vendor-stat-card">
+        <div class="vendor-stat-label">Orders</div>
+        <div class="vendor-stat-value">38</div>
+      </div>
+      <div class="vendor-stat-card">
+        <div class="vendor-stat-label">Rating</div>
+        <div class="vendor-stat-value">4.8<span class="stat-suffix">/ 5</span></div>
+      </div>
+    </div>
+
+    <h2 class="section-title">Recent orders</h2>
+    <div class="orders-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>Item</th>
+            <th>Status</th>
+            <th class="num">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="order-id">#LC-10482</td>
+            <td>Honey oat cookies x2</td>
+            <td><span class="status-pill status-packing">Packing</span></td>
+            <td class="num amount">R170.00</td>
+          </tr>
+          <tr>
+            <td class="order-id">#LC-10475</td>
+            <td>Ginger snap box</td>
+            <td><span class="status-pill status-delivered">Delivered</span></td>
+            <td class="num amount">R95.00</td>
+          </tr>
+          <tr>
+            <td class="order-id">#LC-10461</td>
+            <td>Honey oat cookies x1</td>
+            <td><span class="status-pill status-delivered">Delivered</span></td>
+            <td class="num amount">R85.00</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Action Buttons Row -->
+    <div style="display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap;">
+      <button class="btn-primary" id="overview-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+          <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+          <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+        </svg>
+        Overview
+      </button>
+    </div>
+  </main>
+
+  <script src="index.js"></script>
+
+</body>
+</html>
