@@ -162,7 +162,7 @@
 <body>
 <div class="app">
   <div class="topbar">
-    <button class="back" aria-label="Back to checkout">←</button>
+    <button class="back" aria-label="Back to checkout" onclick="window.location.href='choosedelivery.html'">←</button>
     <h1>RankDrop Pickup Points</h1>
     <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light and dark mode"><svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg><svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 1 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg></button>
   </div>
@@ -171,7 +171,7 @@
   <div class="steps">
     <div class="step done"><span class="circle">✓</span><span>Order Confirmed</span></div>
     <div class="step active"><span class="circle">2</span><span>Choose Pickup Point</span></div>
-    <div class="step"><span class="circle">3</span><span>Order Tracking</span></div>
+    <div class="step"><span class="circle">3</span><span>Checkout</span></div>
   </div>
 
   <div class="searchrow">
@@ -277,6 +277,8 @@ document.getElementById("mainSelect").onclick=()=>{
     background: "#1b1b1d",
     color: "#f5f5f5",
     confirmButtonColor: "#f5821f"
+  }).then((result)=>{
+    if(result.isConfirmed) window.location.href="checkout.html";
   });
 };
 document.getElementById("location").onclick=()=>{
@@ -312,7 +314,7 @@ document.getElementById("location").onclick=()=>{
     noNearbyRank
   );
 };
-document.querySelector(".back").onclick=()=>{window.location.href="checkout.html"};
+document.querySelector(".back").onclick=()=>{window.location.href="choosedelivery.html"};
 let zoom=1;
 document.getElementById("plus").onclick=()=>{zoom=Math.min(1.2,zoom+.05);document.getElementById("map").style.backgroundSize=`${100*zoom}%`};
 document.getElementById("minus").onclick=()=>{zoom=Math.max(.85,zoom-.05);document.getElementById("map").style.backgroundSize=`${100*zoom}%`};

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Choose Delivery Method</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg: #0f0f10;
+			--panel: #1b1b1d;
+			--panel-soft: #2a2a2d;
+			--panel-warm: #2a2118;
+			--line: #3a3a3d;
+			--muted: #9a9a9d;
+			--text: #f5f5f5;
+			--orange: #f5821f;
+			--orange-dark: #a85d16;
+			--green: #19d56b;
+		}
+
+		* { box-sizing: border-box; }
+		body {
+			margin: 0;
+			min-width: 320px;
+			color: var(--text);
+			background:
+				radial-gradient(circle at 75% 15%, rgba(245, 130, 31, 0.06), transparent 28%),
+				linear-gradient(135deg, #0f0f10 0%, #111113 55%, #171719 100%);
+			font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+			font-size: 16px;
+		}
+
+		.page { max-width: 1440px; margin: 0 auto; padding: 44px 48px 42px; }
+		.page-topbar { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+		.breadcrumbs { display: flex; gap: 18px; align-items: center; color: #747474; font-size: 15px; margin-bottom: 18px; }
+		.breadcrumbs span { position: relative; }
+		.breadcrumbs span:not(:last-child)::after { content: ">"; position: absolute; right: -12px; color: #505050; }
+		.breadcrumbs .active { color: var(--orange); font-weight: 700; }
+		h1 { font-size: 32px; line-height: 1.1; margin: 0 0 15px; font-weight: 760; letter-spacing: -0.7px; }
+		.intro { max-width: 580px; color: #8c8c8c; line-height: 1.65; margin: 0; }
+
+		.steps { display: grid; grid-template-columns: 1fr 1fr 1fr; margin: 38px 0 42px; }
+		.step { position: relative; text-align: center; color: #777; font-size: 14px; }
+		.step:not(:last-child)::after { content: ""; height: 3px; background: #292929; position: absolute; top: 20px; left: 52%; width: 96%; }
+		.step.done:not(:last-child)::after { background: var(--orange); }
+		.step-dot { width: 40px; height: 40px; border: 2px solid #323232; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 9px; position: relative; z-index: 1; background: var(--bg); color: #717171; font-weight: 700; }
+		.step.done .step-dot { background: var(--orange); border-color: var(--orange); color: white; }
+		.step.current { color: var(--orange); font-weight: 700; }
+		.step.current .step-dot { border-color: var(--orange); color: var(--orange); }
+
+		.content > section { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(300px, .8fr); gap: 18px 28px; align-items: start; }
+		.delivery-options { display: contents; }
+		.delivery-card { background: var(--panel); border: 1px solid #303030; border-radius: 13px; padding: 32px 34px 28px; min-height: 480px; cursor: pointer; transition: border-color .2s, background .2s, transform .2s; }
+		.delivery-card:hover { transform: translateY(-2px); border-color: #656565; }
+		.delivery-card.selected { background: var(--panel-warm); border-color: #9e5f14; box-shadow: inset 0 4px 0 var(--orange); }
+		.card-heading { display: flex; align-items: center; gap: 18px; position: relative; }
+		.icon-box { width: 56px; height: 56px; flex: 0 0 56px; display: grid; place-items: center; border-radius: 11px; background: #2a251e; border: 1px solid #76501f; color: var(--orange); font-size: 27px; }
+		.selected .icon-box { background: var(--orange); border-color: var(--orange); color: #fff; }
+		.card-heading h2 { font-size: 21px; margin: 0 0 8px; }
+		.card-heading p { color: #858585; margin: 0; font-size: 15px; }
+		.radio { width: 23px; height: 23px; border: 2px solid #343434; border-radius: 50%; position: absolute; right: 0; top: 2px; }
+		.selected .radio { border-color: var(--orange); }
+		.selected .radio::after { content: ""; width: 11px; height: 11px; border-radius: 50%; background: var(--orange); position: absolute; left: 4px; top: 4px; }
+		.popular { position: absolute; right: -12px; top: -9px; background: var(--orange); padding: 4px 14px; border-radius: 12px; font-size: 13px; font-weight: 700; color: white; }
+		.description { color: #929292; line-height: 1.65; margin: 28px 0; min-height: 78px; }
+		.features { list-style: none; border-top: 1px solid #353535; border-bottom: 1px solid #353535; padding: 18px 0 14px; margin: 0; }
+		.features li { display: flex; align-items: center; gap: 14px; color: #8e8e8e; margin: 0 0 14px; line-height: 1.35; }
+		.selected .features li { color: #f1f1f1; }
+		.feature-icon { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 9px; background: #262626; border: 1px solid #3a3a3a; display: grid; place-items: center; color: #888; font-size: 18px; }
+		.selected .feature-icon { background: #3a2a18; border-color: #946019; color: var(--orange); }
+		.price-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding-top: 28px; }
+		.price { font-size: 29px; font-weight: 700; }
+		.selected .price { color: var(--orange); }
+		.price-note, .time { color: #8a8a8a; font-size: 15px; }
+		.time { white-space: nowrap; }
+
+		.side-panel { background: var(--panel); border: 1px solid #303030; border-radius: 13px; overflow: hidden; }
+		.side-column { display: flex; flex-direction: column; grid-column: 3; grid-row: 1 / span 3; }
+		.side-panel h2 { font-size: 18px; margin: 0; padding: 26px; border-bottom: 1px solid #303030; }
+		.summary-body { padding: 24px 26px; }
+		.item { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 22px; font-weight: 700; }
+		.item small { display: block; color: #858585; font-weight: 400; margin-top: 8px; }
+		.summary-line { display: flex; justify-content: space-between; color: #888; padding-top: 14px; }
+		.summary-line.total { border-top: 1px solid #303030; margin-top: 18px; padding-top: 19px; color: var(--text); font-size: 18px; font-weight: 700; }
+		.summary-line.total strong { color: var(--orange); }
+		.side-card { margin-top: 18px; padding: 26px; background: var(--panel); border: 1px solid #303030; border-radius: 13px; }
+		.side-card.selected-info { background: var(--panel-warm); border-color: #875415; }
+		.side-card-title { display: flex; align-items: center; gap: 13px; font-weight: 700; margin-bottom: 15px; }
+		.small-icon { width: 36px; height: 36px; border-radius: 9px; display: grid; place-items: center; background: #292929; color: #a2a2a2; }
+		.selected-info .small-icon { background: var(--orange); color: white; }
+		.side-card p { color: #888; line-height: 1.55; margin: 0; }
+
+		.status-bar { display: flex; grid-column: 1 / 3; margin-top: 12px; padding: 18px 24px; border: 1px solid #303030; border-radius: 13px; color: #898989; gap: 0; font-size: 14px; }
+		.status { flex: 1; display: flex; align-items: center; gap: 11px; }
+		.status:not(:last-child) { border-right: 1px solid #3a3a3a; margin-right: 18px; }
+		.status .green { width: 9px; height: 9px; background: var(--green); border-radius: 50%; box-shadow: 0 0 10px var(--green); }
+		.actions { display: flex; grid-column: 1 / 3; gap: 15px; align-items: center; margin-top: 6px; }
+		button { font: inherit; border: 0; cursor: pointer; }
+		.theme-toggle { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 50%; background: var(--panel); color: var(--text); cursor: pointer; flex: 0 0 36px; }
+		.theme-toggle .icon-moon { display: none; }
+		[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+		[data-theme="light"] .theme-toggle .icon-moon { display: inline; }
+		.continue { color: white; background: var(--orange); font-weight: 700; padding: 17px 28px; border-radius: 10px; min-width: 287px; font-size: 18px; box-shadow: 0 8px 20px rgba(245,145,32,.16); }
+		.continue:hover { background: #ff9f2f; }
+		.back { color: #858585; background: none; padding: 15px 0; font-size: 16px; }
+		[data-theme="light"] body { background: #ffffff; color: #000000; }
+		[data-theme="light"] .theme-toggle { background: #ffffff; color: #000000; border-color: #d0d0d0; }
+		[data-theme="light"] .breadcrumbs { color: #666666; }
+		[data-theme="light"] .breadcrumbs span:not(:last-child)::after { color: #b0b0b0; }
+		[data-theme="light"] .intro,
+		[data-theme="light"] .card-heading p,
+		[data-theme="light"] .description,
+		[data-theme="light"] .features li,
+		[data-theme="light"] .price-note,
+		[data-theme="light"] .time,
+		[data-theme="light"] .item small,
+		[data-theme="light"] .summary-line,
+		[data-theme="light"] .side-card p,
+		[data-theme="light"] .status,
+		[data-theme="light"] .back { color: #666666; }
+		[data-theme="light"] .step { color: #666666; }
+		[data-theme="light"] .step-dot { background: #ffffff; border-color: #d0d0d0; color: #666666; }
+		[data-theme="light"] .step:not(:last-child)::after { background: #d0d0d0; }
+		[data-theme="light"] .delivery-card,
+		[data-theme="light"] .side-panel,
+		[data-theme="light"] .side-card,
+		[data-theme="light"] .status-bar { background: #ffffff; border-color: #d0d0d0; }
+		[data-theme="light"] .delivery-card.selected,
+		[data-theme="light"] .side-card.selected-info { background: #fff4e8; border-color: #d98a2b; }
+		[data-theme="light"] .features { border-color: #d0d0d0; }
+		[data-theme="light"] .summary-line.total { border-color: #d0d0d0; color: #000000; }
+		[data-theme="light"] .feature-icon,
+		[data-theme="light"] .small-icon { background: #f2f2f2; border-color: #d0d0d0; color: #666666; }
+		[data-theme="light"] .selected .feature-icon,
+		[data-theme="light"] .selected-info .small-icon { background: #ffe2bd; border-color: #d98a2b; color: var(--orange); }
+
+		@media (max-width: 1050px) {
+			.page { padding: 32px 28px; }
+			.content > section { display: block; }
+			.delivery-options { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+			.status-bar { margin-top: 30px; }
+			.actions { margin-top: 24px; }
+			.side-panel, .side-card { margin-top: 0; }
+		}
+		@media (max-width: 700px) {
+			.page { padding: 25px 16px 32px; }
+			h1 { font-size: 27px; }
+			.steps { margin: 30px 0; }
+			.step { font-size: 0; }
+			.step-dot { margin-bottom: 0; }
+			.delivery-options, .side-column { grid-template-columns: 1fr; }
+			.delivery-card { min-height: 0; padding: 25px 22px; }
+			.description { min-height: 0; margin: 24px 0; }
+			.price-row { flex-wrap: wrap; }
+			.time { white-space: normal; }
+			.status-bar { flex-direction: column; gap: 15px; }
+			.status:not(:last-child) { border-right: 0; border-bottom: 1px solid #3a3a3a; padding-bottom: 14px; margin-right: 0; }
+			.actions { flex-direction: column; align-items: stretch; }
+			.continue { width: 100%; }
+			.back { text-align: center; }
+		}
+	</style>
+</head>
+<body>
+	<main class="page">
+		<div class="page-topbar">
+			<nav class="breadcrumbs" aria-label="Checkout progress"><span>Cart</span><span class="active">Delivery</span><span>Checkout</span></nav>
+			<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light and dark mode"><svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg><svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 1 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg></button>
+		</div>
+		<h1>Choose Delivery Method</h1>
+		<p class="intro">Select how you'd like to receive your order. Both options are tracked<br class="desktop-break"> and covered by our buyer protection guarantee.</p>
+
+		<section class="steps" aria-label="Checkout steps">
+			<div class="step done"><div class="step-dot">&#10003;</div><span>Cart</span></div>
+			<div class="step current"><div class="step-dot">2</div><span>Delivery</span></div>
+			<div class="step"><div class="step-dot">3</div><span>Checkout</span></div>
+		</section>
+
+		<div class="content">
+			<section>
+				<div class="delivery-options">
+					<article class="delivery-card" data-method="home">
+						<div class="card-heading"><div class="icon-box">&#8962;</div><div><h2>Home Delivery</h2><p>Delivered straight to your door</p></div><span class="radio"></span></div>
+						<p class="description">A courier will bring your parcel directly to the delivery address you provided. Track it in real time from dispatch to your doorstep.</p>
+						<ul class="features">
+							<li><span class="feature-icon">&#9633;</span>Door-to-door courier service</li>
+							<li><span class="feature-icon">&#9711;</span>Live tracking via SMS &amp; WhatsApp</li>
+							<li><span class="feature-icon">&#10065;</span>R1 000 transit insurance included</li>
+							<li><span class="feature-icon">&#9734;</span>Signature confirmation on delivery</li>
+						</ul>
+						<div class="price-row"><strong class="price">R245.00</strong><span class="price-note">Standard rate</span><span class="time">&#9711; 1-3 business days</span></div>
+					</article>
+
+					<article class="delivery-card selected" data-method="rank">
+						<div class="card-heading"><div class="icon-box">&#9678;</div><div><h2>Rank Drop</h2><p>Collect at your nearest taxi rank</p></div><span class="radio"></span><span class="popular">Most Popular</span></div>
+						<p class="description">Your parcel travels with goods already heading to your rank. Collect it on your daily commute - no courier, no waiting at home, no delivery address needed.</p>
+						<ul class="features">
+							<li><span class="feature-icon">&#9678;</span>6 active ranks across Cape Town</li>
+							<li><span class="feature-icon">&#9711;</span>Ready within hours, not days</li>
+							<li><span class="feature-icon">&#10065;</span>Rank association custody guarantee</li>
+							<li><span class="feature-icon">&#9633;</span>No delivery address required</li>
+						</ul>
+						<div class="price-row"><strong class="price">R100.00</strong><span class="price-note">Cheapest option</span><span class="time">&#9711; Same or next day</span></div>
+					</article>
+				</div>
+				<div class="status-bar"><div class="status"><span class="green"></span>6 ranks live in Cape Town</div><div class="status">&#9711; Rank drops processed within 2 hrs</div><div class="status">&#10065; All methods insured up to R1000</div></div>
+				<div class="actions"><button class="back" type="button" onclick="window.location.href='cart.html'">&larr; Back to address</button></div>
+				<aside class="side-column">
+				<section class="side-panel"><h2>Order Summary</h2><div class="summary-body"><div class="item"><div>Honey Oat Cookies<small>Qty: 1</small></div><span>R85.00</span></div><div class="item"><div>Shea Body Butter<small>Qty: 1</small></div><span>R150.00</span></div><div
+        class="item"><div>Beaded Tote Bag<small>Qty: 1</small></div><span>R320.00</span></div><div 
+        class="summary-line"><span>Subtotal</span><strong>R455.00</strong></div><div class="summary-line"><span>Delivery</span><strong id="delivery-total">R100.00</strong></div><div class="summary-line total"><span>Total</span><strong id="grand-total">R555.00</strong></div></div></section>
+				<section class="side-card selected-info" id="selection-card"><div class="side-card-title"><span class="small-icon">&#9678;</span>Rank Drop</div><p>Select your nearest rank in the next step. Collect anytime within 48 hrs.</p></section>
+				<section class="side-card"><div class="side-card-title"><span class="small-icon">&#10065;</span>Buyer Protection</div><p>All orders are covered. If your parcel doesn't arrive, we'll refund you in full.</p></section>
+				</aside>
+			</section>
+		</div>
+	</main>
+	<script src="sweetalert2.bundle.js"></script>
+	<script>
+		const themeToggle = document.getElementById('theme-toggle');
+		const savedTheme = localStorage.getItem('localcart-theme');
+		if (savedTheme === 'light') document.documentElement.dataset.theme = 'light';
+		themeToggle.addEventListener('click', () => {
+			const isLight = document.documentElement.dataset.theme === 'light';
+			document.documentElement.dataset.theme = isLight ? 'dark' : 'light';
+			localStorage.setItem('localcart-theme', isLight ? 'dark' : 'light');
+		});
+
+		const cards = document.querySelectorAll('.delivery-card');
+		cards.forEach((card) => card.addEventListener('click', () => {
+			if (card.dataset.method === 'rank') {
+				window.location.href = 'rankdelivery.html';
+				return;
+			}
+
+			Swal.fire({
+				title: 'You chose home delivery',
+				text: 'Proceed to checkout to enter your address.',
+				icon: 'info',
+				confirmButtonText: 'OK'
+			}).then((result) => {
+				if (result.isConfirmed) window.location.href = 'checkout.html';
+			});
+		}));
+	</script>
+</body>
+</html>

@@ -254,7 +254,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             // Save to sessionStorage for checkout
             sessionStorage.setItem('checkoutCart', JSON.stringify(cartData));
-            window.location.href = 'checkout.html';
+            window.location.href = 'choosedelivery.html';
         });
     }
 });
