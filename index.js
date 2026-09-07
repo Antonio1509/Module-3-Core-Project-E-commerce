@@ -226,6 +226,115 @@ function updateProfileDropdown(user) {
 }
 
 /* ===========================================================
+   TOAST / POPUP NOTIFICATION
+   =========================================================== */
+
+function showPopupNotification(message, type = 'success', duration = 3000) {
+  // Remove existing popup
+  const existingPopup = document.querySelector('.custom-popup-notification');
+  if (existingPopup) {
+    existingPopup.remove();
+  }
+
+  // Create popup element
+  const popup = document.createElement('div');
+  popup.className = 'custom-popup-notification';
+  
+  const icon = type === 'success' ? '✅' : '⚠️';
+  
+  popup.innerHTML = `
+    <div class="popup-icon">${icon}</div>
+    <div class="popup-message">${message}</div>
+    <button class="popup-close-btn">×</button>
+  `;
+
+  // Style the popup
+  Object.assign(popup.style, {
+    position: 'fixed',
+    bottom: '30px',
+    right: '30px',
+    backgroundColor: 'var(--card, #1e1e22)',
+    color: 'var(--text, #f5f5f4)',
+    padding: '18px 24px',
+    borderRadius: '14px',
+    border: '1px solid var(--border, #2c2c31)',
+    boxShadow: '0 12px 40px rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    zIndex: '9999',
+    minWidth: '300px',
+    maxWidth: '450px',
+    fontSize: '15px',
+    fontWeight: '500',
+    opacity: '0',
+    transform: 'translateY(30px) scale(0.95)',
+    transition: 'opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1), transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    backdropFilter: 'blur(8px)',
+    background: type === 'success' 
+      ? 'rgba(30, 30, 34, 0.95)' 
+      : 'rgba(40, 30, 30, 0.95)'
+  });
+
+  // Style the icon
+  const iconEl = popup.querySelector('.popup-icon');
+  iconEl.style.fontSize = '22px';
+  iconEl.style.flexShrink = '0';
+
+  // Style the message
+  const msgEl = popup.querySelector('.popup-message');
+  msgEl.style.flex = '1';
+  msgEl.style.lineHeight = '1.4';
+
+  // Style the close button
+  const closeBtn = popup.querySelector('.popup-close-btn');
+  Object.assign(closeBtn.style, {
+    background: 'none',
+    border: 'none',
+    color: 'var(--text-faint, #6f6f78)',
+    fontSize: '22px',
+    cursor: 'pointer',
+    padding: '0 4px',
+    lineHeight: '1',
+    transition: 'color 0.2s ease'
+  });
+  closeBtn.addEventListener('mouseenter', () => {
+    closeBtn.style.color = 'var(--text, #f5f5f4)';
+  });
+  closeBtn.addEventListener('mouseleave', () => {
+    closeBtn.style.color = 'var(--text-faint, #6f6f78)';
+  });
+  closeBtn.addEventListener('click', () => {
+    popup.style.opacity = '0';
+    popup.style.transform = 'translateY(30px) scale(0.95)';
+    setTimeout(() => popup.remove(), 400);
+  });
+
+  // Add to body
+  document.body.appendChild(popup);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    popup.style.opacity = '1';
+    popup.style.transform = 'translateY(0) scale(1)';
+  });
+
+  // Auto dismiss
+  setTimeout(() => {
+    if (document.body.contains(popup)) {
+      popup.style.opacity = '0';
+      popup.style.transform = 'translateY(30px) scale(0.95)';
+      setTimeout(() => {
+        if (document.body.contains(popup)) {
+          popup.remove();
+        }
+      }, 400);
+    }
+  }, duration);
+}
+
+/* ===========================================================
    DOM CONTENT LOADED
    =========================================================== */
 
@@ -251,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCartButton();
   initLoginRedirect();
   initProfileDropdown();
-  initVendorSearch(); // New function for vendor search
+  initVendorSearch();
 });
 
 /* ---------------------------------------------------------
@@ -482,7 +591,6 @@ function initAddProductForm() {
   function showToast(title, message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) {
-      // Create toast container if it doesn't exist
       const newContainer = document.createElement('div');
       newContainer.className = 'toast-container';
       newContainer.id = 'toast-container';
@@ -636,7 +744,6 @@ function initSearch() {
   const productsGrid = document.getElementById('products-grid');
 
   if (!productsGrid) {
-    // Not the shop page — Enter redirects to the shop with the query.
     input.addEventListener('keydown', (e) => {
       if (e.key !== 'Enter') return;
       e.preventDefault();
@@ -647,7 +754,6 @@ function initSearch() {
     return;
   }
 
-  // Shop page: live filtering.
   const state = { searchTerm: '', activeCategory: null };
 
   const params = new URLSearchParams(window.location.search);
@@ -788,16 +894,36 @@ function saveCart(items) {
   try { localStorage.setItem(CART_KEY, JSON.stringify(items)); } catch (e) { /* ignore */ }
 }
 
-function addToCart(name, vendor, price) {
+function addToCart(name, vendor, price, btnElement) {
   const items = getCart();
   const existing = items.find((i) => i.name === name && i.vendor === vendor);
+  let itemName = name;
+  
   if (existing) {
     existing.qty += 1;
+    itemName = name;
   } else {
     items.push({ name, vendor, price, qty: 1 });
+    itemName = name;
   }
   saveCart(items);
   renderCartBadge();
+  
+  // Show popup notification
+  showPopupNotification(`"${itemName}" added to cart! 🛒`);
+  
+  // Update button visual feedback
+  if (btnElement) {
+    const originalText = btnElement.textContent;
+    btnElement.textContent = 'Added ✓';
+    btnElement.classList.add('added');
+    btnElement.disabled = true;
+    setTimeout(() => {
+      btnElement.textContent = originalText;
+      btnElement.classList.remove('added');
+      btnElement.disabled = false;
+    }, 1500);
+  }
 }
 
 function renderCartBadge() {
@@ -813,24 +939,14 @@ function initAddToCart() {
     const btn = card.querySelector('.btn-add-cart');
     if (!btn) return;
 
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', function(e) {
       e.stopPropagation();
       const name = card.dataset.name;
       const vendor = card.dataset.vendor;
       const price = parseFloat(card.dataset.price);
       if (!name || Number.isNaN(price)) return;
 
-      addToCart(name, vendor, price);
-
-      const originalText = btn.textContent;
-      btn.textContent = 'Added ✓';
-      btn.classList.add('added');
-      btn.disabled = true;
-      setTimeout(() => {
-        btn.textContent = originalText;
-        btn.classList.remove('added');
-        btn.disabled = false;
-      }, 900);
+      addToCart(name, vendor, price, this);
     });
   });
 }
@@ -840,15 +956,12 @@ function initAddToCart() {
    =========================================================== */
 
 function initVendorDashboard() {
-  // Check if we're on the vendor dashboard page
   const mainEl = document.querySelector('.vendor-main');
   if (!mainEl) return;
 
-  // Initialize vendor data if it doesn't exist
   const vendorName = getCurrentVendorName();
   let data = getVendorData();
   
-  // If no vendor data exists, create default
   if (!data[vendorName]) {
     data[vendorName] = {
       name: vendorName,
@@ -857,13 +970,9 @@ function initVendorDashboard() {
     saveVendorData(data);
   }
 
-  // Update vendor stats
   updateVendorStats(vendorName);
-  
-  // Load and display vendor products
   renderVendorProducts(vendorName);
   
-  // Set up vendor switch if it exists
   const select = document.getElementById('vendor-switch');
   if (select) {
     select.addEventListener('change', () => {
@@ -884,14 +993,12 @@ function updateVendorStats(vendorName) {
   const products = vendor.products || [];
   const publishedProducts = products.filter(p => p.status !== 'draft');
   
-  // Update stats
   const productCountEl = document.getElementById('stat-products') || 
                          document.querySelector('.vendor-stat-card:nth-child(1) .vendor-stat-value');
   const salesEl = document.getElementById('stat-sales');
   const ordersEl = document.getElementById('stat-orders');
   
   if (productCountEl && !productCountEl.closest('.vendor-stat-card')?.querySelector('.vendor-stat-label')?.textContent.includes('Sales')) {
-    // This is the products stat
     const card = productCountEl.closest('.vendor-stat-card');
     if (card) {
       const label = card.querySelector('.vendor-stat-label');
@@ -900,30 +1007,25 @@ function updateVendorStats(vendorName) {
     }
   }
   
-  // Update other stats if they exist
   if (salesEl) {
-    // Calculate total sales from products (simulated)
     const totalSales = publishedProducts.reduce((sum, p) => sum + (p.price || 0), 0);
     salesEl.textContent = `R${totalSales.toFixed(0)}`;
   }
   
   if (ordersEl) {
-    ordersEl.textContent = publishedProducts.length * 2; // Simulated orders
+    ordersEl.textContent = publishedProducts.length * 2;
   }
   
-  // Update welcome message with vendor name
   const welcomeEl = document.getElementById('dash-welcome');
   if (welcomeEl) {
     welcomeEl.textContent = `Welcome back, ${vendor.name || vendorName}`;
   }
   
-  // Update vendor name in header
   const vendorNameEl = document.getElementById('dash-vendor-name');
   if (vendorNameEl) {
     vendorNameEl.textContent = vendor.name || vendorName;
   }
   
-  // Update avatar
   const avatarEl = document.getElementById('dash-avatar');
   if (avatarEl) {
     const initials = (vendor.name || vendorName).split(' ').map(p => p[0]).join('');
@@ -940,11 +1042,9 @@ function renderVendorProducts(vendorName) {
   const products = vendor.products || [];
   const publishedProducts = products.filter(p => p.status !== 'draft');
   
-  // Find or create products table
   let productsSection = document.getElementById('vendor-products-section');
   
   if (!productsSection) {
-    // Create products section if it doesn't exist
     const mainEl = document.querySelector('.vendor-main');
     if (!mainEl) return;
     
@@ -974,7 +1074,6 @@ function renderVendorProducts(vendorName) {
   const tbody = document.getElementById('products-tbody');
   if (!tbody) return;
   
-  // Update section title
   const title = productsSection.querySelector('.section-title');
   if (title) {
     title.textContent = `Your Products (${publishedProducts.length})`;
@@ -1421,22 +1520,14 @@ function initProductModal() {
     if (e.key === 'Escape' && !modal.hidden) closeModal();
   });
 
-  addBtn.addEventListener('click', () => {
+  addBtn.addEventListener('click', function() {
     if (!activeCard) return;
     const name = activeCard.dataset.name;
     const vendor = activeCard.dataset.vendor;
     const price = parseFloat(activeCard.dataset.price);
     if (!name || Number.isNaN(price)) return;
 
-    addToCart(name, vendor, price);
-    addBtn.textContent = 'Added ✓';
-    addBtn.classList.add('added');
-    addBtn.disabled = true;
-    setTimeout(() => {
-      addBtn.textContent = 'Add to cart';
-      addBtn.classList.remove('added');
-      addBtn.disabled = false;
-    }, 900);
+    addToCart(name, vendor, price, this);
   });
 }
 
@@ -1561,7 +1652,7 @@ document.addEventListener('DOMContentLoaded', function() {
       checkoutBtn.addEventListener('click', function() {
         let cart = JSON.parse(localStorage.getItem("localcart-cart")) || [];
         if (cart.length === 0) {
-          alert('Your cart is empty!');
+          showPopupNotification('Your cart is empty!', 'warning');
           return;
         }
         const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -1573,7 +1664,7 @@ document.addEventListener('DOMContentLoaded', function() {
             cartCount.textContent = '0';
             cartCount.hidden = true;
           }
-          alert('✅ Order placed successfully!');
+          showPopupNotification('✅ Order placed successfully!');
         }
       });
     }
