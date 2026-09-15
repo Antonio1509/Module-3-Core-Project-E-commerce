@@ -4874,3 +4874,102 @@ select.form-control option {
     color: #fff !important;
     border-color: var(--success, #4caf7d) !important;
 }
+
+/* ============================================
+   PAYFAST PAYMENT OPTION
+   ============================================ */
+.payfast-payment-option {
+    padding: 20px;
+    background: var(--card-hover);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-top: 8px;
+}
+
+.payfast-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text);
+    margin-bottom: 12px;
+}
+
+.payfast-header svg {
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+.payfast-description {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.payfast-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.payfast-methods span {
+    padding: 6px 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* PayFast button styling */
+.btn-place-order.payfast-btn {
+    background: linear-gradient(135deg, #f0811f, #e8760f);
+    color: white;
+    font-weight: 700;
+}
+
+.btn-place-order.payfast-btn:hover {
+    background: linear-gradient(135deg, #ff9433, #f0811f);
+}
+
+/* PayFast loading state */
+.payfast-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .payfast-methods {
+        justify-content: center;
+    }
+
+    .payfast-methods span {
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+
+    .payfast-header {
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .payfast-payment-option {
+        padding: 16px;
+    }
+
+    .payfast-methods span {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+}   

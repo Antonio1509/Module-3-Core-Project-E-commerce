@@ -664,10 +664,8 @@
     });
   });
 
-  // In-memory "database" of registered accounts for this session.
-  // Note: this resets on page reload since nothing is persisted to
-  // a real backend yet — swap this out once you have one.
-  const registeredUsers = [];
+  // Backend API base URL — matches checkout.js
+  const API_URL = 'http://localhost:5000/api';
 
   // Safe wrapper: if the local SweetAlert2 script failed to load,
   // this falls back to a plain browser alert instead of failing silently.
@@ -688,117 +686,170 @@
     }
   }
 
-  document.getElementById('loginForm').addEventListener('submit', (e) => {
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const role = document.querySelector('.login-role.active').dataset.role;
     const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const password = document.getElementById('loginPassword').value;
 
-    const match = registeredUsers.find(
-      user => user.email.toLowerCase() === email && user.password === password
-    );
-
-    if (!match) {
-      showAlert({
-        icon: 'error',
-        title: 'Login failed',
-        text: 'Incorrect username or password.'
-      });
-      return;
-    }
-
-    console.log('Login attempt:', { role, email });
-    showAlert({
-      icon: 'success',
-      title: 'Logged in!',
-      text: `Welcome back, logging in as ${role}.`
-    }).then(() => {
-      window.location.href = role === 'vendor'
-        ? 'vendor-dashboard.html'
-        : 'index.html';
-    });
-  });
-
-  document.getElementById('registerForm').addEventListener('submit', (e) => {
-    e.preventDefault();
     try {
-      const isVendor = document.querySelector('.register-role.active').dataset.role === 'vendor';
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
 
-      if (isVendor) {
-        const password = document.getElementById('vendPassword').value;
-        const confirmPassword = document.getElementById('vendConfirmPassword').value;
+      const result = await response.json();
 
-        if (password !== confirmPassword) {
-          showAlert({
-            icon: 'error',
-            title: 'Passwords don\'t match',
-            text: 'Please make sure both password fields are identical.'
-          });
-          return;
-        }
-
-        const data = {
-          role: 'Vendor',
-          storeName: document.getElementById('vendStoreName').value,
-          email: document.getElementById('vendStoreEmail').value,
-          storePhone: document.getElementById('vendStorePhone').value,
-          ownerId: document.getElementById('vendOwnerId').value,
-          ownerName: document.getElementById('vendOwnerName').value,
-          street: document.getElementById('vendStreet').value,
-          suburb: document.getElementById('vendSuburb').value,
-          city: document.getElementById('vendCity').value,
-          province: document.getElementById('vendProvince').value,
-          postalCode: document.getElementById('vendPostalCode').value,
-          password: password
-        };
-        console.log('Register attempt:', data);
-        registeredUsers.push({ email: data.email, password: data.password, role: 'vendor' });
+      if (!response.ok) {
         showAlert({
-          icon: 'success',
-          title: 'Vendor account created!',
-          text: `Welcome to LocalCart, ${data.storeName}. You can now log in.`
+          icon: 'error',
+          title: 'Login failed',
+          text: result.message || 'Incorrect username or password.'
         });
-      } else {
-        const password = document.getElementById('custPassword').value;
-        const confirmPassword = document.getElementById('custConfirmPassword').value;
-
-        if (password !== confirmPassword) {
-          showAlert({
-            icon: 'error',
-            title: 'Passwords don\'t match',
-            text: 'Please make sure both password fields are identical.'
-          });
-          return;
-        }
-
-        const data = {
-          role: 'Customer',
-          fullName: document.getElementById('custFullName').value,
-          username: document.getElementById('custUsername').value,
-          email: document.getElementById('custEmail').value,
-          phone: document.getElementById('custPhone').value,
-          street: document.getElementById('custStreet').value,
-          suburb: document.getElementById('custSuburb').value,
-          city: document.getElementById('custCity').value,
-          province: document.getElementById('custProvince').value,
-          postalCode: document.getElementById('custPostalCode').value,
-          gender: document.getElementById('custGender').value,
-          password: password
-        };
-        console.log('Register attempt:', data);
-        registeredUsers.push({ email: data.email, password: data.password, role: 'customer' });
-        showAlert({
-          icon: 'success',
-          title: 'Account created!',
-          text: `Welcome to LocalCart, ${data.fullName}. You can now log in.`
-        });
+        return;
       }
+
+      // Save the real auth token + user info so other pages (checkout.js, etc.) can use them
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+
+      showAlert({
+        icon: 'success',
+        title: 'Logged in!',
+        text: `Welcome back, ${result.user.name}.`
+      }).then(() => {
+        window.location.href = result.user.is_vendor
+          ? 'vendor-dashboard.html'
+          : 'index.html';
+      });
     } catch (err) {
-      console.error('Register handler error:', err);
+      console.error('Login request error:', err);
       showAlert({
         icon: 'error',
         title: 'Something went wrong',
-        text: 'Please check that every field is filled in and try again.'
+        text: 'Could not reach the server. Please check your connection and try again.'
+      });
+    }
+  });
+
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const isVendor = document.querySelector('.register-role.active').dataset.role === 'vendor';
+
+    let payload;
+    let welcomeName;
+
+    if (isVendor) {
+      const password = document.getElementById('vendPassword').value;
+      const confirmPassword = document.getElementById('vendConfirmPassword').value;
+
+      if (password !== confirmPassword) {
+        showAlert({
+          icon: 'error',
+          title: 'Passwords don\'t match',
+          text: 'Please make sure both password fields are identical.'
+        });
+        return;
+      }
+
+      const storeName = document.getElementById('vendStoreName').value;
+      const storeEmail = document.getElementById('vendStoreEmail').value;
+      const storePhone = document.getElementById('vendStorePhone').value;
+      const ownerId = document.getElementById('vendOwnerId').value;
+      const ownerName = document.getElementById('vendOwnerName').value;
+      const vendStreet = document.getElementById('vendStreet').value;
+      const vendSuburb = document.getElementById('vendSuburb').value;
+      const vendCity = document.getElementById('vendCity').value;
+      const vendProvince = document.getElementById('vendProvince').value;
+      const vendPostalCode = document.getElementById('vendPostalCode').value;
+
+      welcomeName = storeName;
+      payload = {
+        name: ownerName,
+        email: storeEmail,
+        password: password,
+        phone: storePhone,
+        street: vendStreet,
+        suburb: vendSuburb,
+        city: vendCity,
+        province: vendProvince,
+        postal_code: vendPostalCode,
+        is_vendor: true,
+        storeName: storeName,
+        storeEmail: storeEmail,
+        storePhone: storePhone,
+        ownerId: ownerId,
+        ownerName: ownerName,
+        vendCity: vendCity,
+        vendProvince: vendProvince
+      };
+    } else {
+      const password = document.getElementById('custPassword').value;
+      const confirmPassword = document.getElementById('custConfirmPassword').value;
+
+      if (password !== confirmPassword) {
+        showAlert({
+          icon: 'error',
+          title: 'Passwords don\'t match',
+          text: 'Please make sure both password fields are identical.'
+        });
+        return;
+      }
+
+      const fullName = document.getElementById('custFullName').value;
+
+      welcomeName = fullName;
+      payload = {
+        name: fullName,
+        username: document.getElementById('custUsername').value,
+        email: document.getElementById('custEmail').value,
+        password: password,
+        phone: document.getElementById('custPhone').value,
+        street: document.getElementById('custStreet').value,
+        suburb: document.getElementById('custSuburb').value,
+        city: document.getElementById('custCity').value,
+        province: document.getElementById('custProvince').value,
+        postal_code: document.getElementById('custPostalCode').value,
+        gender: document.getElementById('custGender').value,
+        is_vendor: false
+      };
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        showAlert({
+          icon: 'error',
+          title: 'Registration failed',
+          text: result.message || 'Please check your details and try again.'
+        });
+        return;
+      }
+
+      // Registration returns a token too - log the user straight in
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+
+      showAlert({
+        icon: 'success',
+        title: isVendor ? 'Vendor account created!' : 'Account created!',
+        text: `Welcome to LocalCart, ${welcomeName}.`
+      }).then(() => {
+        window.location.href = isVendor ? 'vendor-dashboard.html' : 'index.html';
+      });
+    } catch (err) {
+      console.error('Register request error:', err);
+      showAlert({
+        icon: 'error',
+        title: 'Something went wrong',
+        text: 'Could not reach the server. Please check your connection and try again.'
       });
     }
   });
