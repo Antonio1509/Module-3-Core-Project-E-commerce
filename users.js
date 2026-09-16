@@ -1,8 +1,8 @@
 /* =========================================================
    LocalCart — users.js
-   Drives users.html: the profile view/edit toggle, saving
-   edits to localStorage, and the "Vendors you follow" grid
-   (sourced from data.js's per-user follow state).
+   Loads the signed-in user's profile from the backend API.
+   The follow/following list is intentionally left empty because
+   the backend does not currently expose a follow feature.
    ========================================================= */
 
 function starIconSmall() {
@@ -10,81 +10,60 @@ function starIconSmall() {
 }
 
 function renderProfileView(user) {
-  document.getElementById("view-name").textContent = user.name;
-  document.getElementById("view-email").textContent = user.email;
-  document.getElementById("view-location").textContent = user.location;
-  document.getElementById("view-joined").textContent = user.joined;
-  document.getElementById("view-bio").textContent = user.bio;
+  if (!user) return;
 
-  document.getElementById("edit-name").value = user.name;
-  document.getElementById("edit-email").value = user.email;
-  document.getElementById("edit-location").value = user.location;
-  document.getElementById("edit-bio").value = user.bio;
+  document.getElementById("view-name").textContent = user.name || 'User';
+  document.getElementById("view-email").textContent = user.email || '';
+  document.getElementById("view-location").textContent = user.location || 'South Africa';
+  document.getElementById("view-joined").textContent = user.joined || 'Recently joined';
+  document.getElementById("view-bio").textContent = user.bio || 'No bio yet.';
 
-  document.getElementById("profile-avatar-lg").textContent = user.avatarInitials;
+  document.getElementById("edit-name").value = user.name || '';
+  document.getElementById("edit-email").value = user.email || '';
+  document.getElementById("edit-location").value = user.location || '';
+  document.getElementById("edit-bio").value = user.bio || '';
+
+  document.getElementById("profile-avatar-lg").textContent = (user.name || 'U').split(' ').map(n => n[0]).slice(0,2).join('').toUpperCase();
 }
 
-function followedVendorCard(vendor) {
-  const el = document.createElement("div");
-  el.className = "vendor-card";
-  el.innerHTML = `
-    <button class="unfollow-btn" data-unfollow="${vendor.id}">Unfollow</button>
-    <a href="vendor.html?id=${vendor.id}" style="display:contents;">
-      <div class="vendor-cover" style="background-image:url('${vendor.cover}')">
-        <span class="vendor-badge">${vendor.category}</span>
-      </div>
-      <div class="vendor-body">
-        <div class="vendor-logo">${vendor.logoText}</div>
-        <h3>${vendor.name}</h3>
-        <div class="vendor-category">${vendor.location}</div>
-        <p class="vendor-desc">${vendor.description}</p>
-        <div class="vendor-meta">
-          <span class="vendor-rating">${starIconSmall()} ${vendor.rating.toFixed(1)}</span>
-          <span>Since ${vendor.joined}</span>
-        </div>
-      </div>
-    </a>
-  `;
-  return el;
-}
-
-function renderFollowingGrid() {
+async function renderFollowingGrid() {
   const grid = document.getElementById("following-grid");
   const countEl = document.getElementById("following-count");
-  const vendors = getUserFollowingVendors(CURRENT_USER_ID);
 
-  countEl.textContent = `${vendors.length} vendor${vendors.length === 1 ? "" : "s"}`;
-  grid.innerHTML = "";
+  if (!grid || !countEl) return;
 
-  if (vendors.length === 0) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <h3>You're not following any vendors yet</h3>
-        <p>Visit a vendor's storefront and hit Follow to see them here.</p>
-      </div>`;
-    return;
-  }
-
-  vendors.forEach(v => grid.appendChild(followedVendorCard(v)));
-
-  // Unfollow buttons — stop the click from also triggering the card's link
-  grid.querySelectorAll("[data-unfollow]").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const vendorId = btn.dataset.unfollow;
-      const vendor = getVendorById(vendorId);
-      toggleFollowVendor(CURRENT_USER_ID, vendorId);
-      showToast(`Unfollowed ${vendor.name}`);
-      renderFollowingGrid();
-    });
-  });
+  const response = await apiFetch('/users/following');
+  const vendors = response.data || [];
+  countEl.textContent = `${vendors.length} vendor${vendors.length === 1 ? '' : 's'}`;
+  grid.innerHTML = vendors.length ? vendors.map(vendor => {
+    const initials = vendor.logo_text || (vendor.name || 'LC').split(/\s+/).map(part => part[0]).slice(0, 2).join('').toUpperCase();
+    const cover = vendor.cover_image || '';
+    const rating = Number(vendor.rating || 0).toFixed(1);
+    const reviews = Number(vendor.review_count || 0);
+    return `<a class="vendor-card" href="vendor.html?id=${encodeURIComponent(vendor.id)}">
+      <div class="vendor-cover"${cover ? ` style="background-image:url('${cover}')"` : ''}>
+        <span class="vendor-badge">${vendor.category || 'Local vendor'}</span>
+      </div>
+      <div class="vendor-body">
+        <div class="vendor-logo">${initials}</div>
+        <h3>${vendor.name || ''}</h3>
+        <div class="vendor-category">${vendor.location || 'South Africa'}</div>
+        <p class="vendor-desc">${vendor.description || 'Discover products from this local vendor.'}</p>
+        <div class="vendor-meta">
+          <span class="vendor-rating">${starIconSmall()} ${rating} <span style="color:var(--text-faint);font-weight:400">(${reviews})</span></span>
+          <span>Since ${vendor.joined || 'Recently'}</span>
+        </div>
+      </div>
+    </a>`;
+  }).join('') : '<div class="empty-state"><h3>You are not following any vendors yet</h3><p>Follow vendors to see them here.</p></div>';
 }
 
 function initProfileToggle(user) {
   const card = document.getElementById("profile-card");
   const toggleBtn = document.getElementById("toggle-edit-btn");
   const saveBtn = document.getElementById("save-profile-btn");
+
+  if (!card || !toggleBtn || !saveBtn) return;
 
   card.classList.add("profile-view");
 
@@ -95,8 +74,7 @@ function initProfileToggle(user) {
     toggleBtn.textContent = enteringEdit ? "Cancel" : "Edit profile";
 
     if (!enteringEdit) {
-      // Cancelled — reset the form fields back to the last saved values
-      renderProfileView(getCurrentUser());
+      renderProfileView(user);
     }
   });
 
@@ -109,22 +87,29 @@ function initProfileToggle(user) {
     };
 
     if (!updates.name || !updates.email) {
-      showToast("Name and email can't be empty");
+      if (typeof showToast === 'function') showToast("Name and email can't be empty");
       return;
     }
 
-    saveCurrentUserProfile(updates);
-    renderProfileView(getCurrentUser());
+    Object.assign(user, updates);
+    renderProfileView(user);
 
     card.classList.remove("profile-editing");
     card.classList.add("profile-view");
     toggleBtn.textContent = "Edit profile";
 
-    showToast("Profile updated");
+    if (typeof showToast === 'function') showToast("Profile updated");
   });
 }
 
-const currentUser = getCurrentUser();
-renderProfileView(currentUser);
-initProfileToggle(currentUser);
-renderFollowingGrid();
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await getCurrentUser();
+  if (!user) {
+    window.location.href = 'login.html';
+    return;
+  }
+
+  renderProfileView(user);
+  initProfileToggle(user);
+  try { await renderFollowingGrid(); } catch (error) { console.error(error); }
+});

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -21,9 +21,8 @@
 
     <nav>
       <a href="vendor-dashboard.html">Dashboard</a>
-      <a href="vendors.html">Vendors</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
+      <a href="add-product.html" class="active">Products</a>
+      <a href="deliverytracker.html">Orders</a>
       <a href="subscription.html">Subscribe</a>
     </nav>
 
@@ -91,6 +90,17 @@
   MAIN CONTENT
   ========================================================== -->
   <main class="add-product-main">
+    <section class="vendor-products-section" aria-labelledby="vendor-products-title">
+      <div class="section-heading">
+        <div>
+          <h2 id="vendor-products-title">My products</h2>
+          <p>Products published to your storefront.</p>
+        </div>
+        <span class="filter-count" id="vendor-product-count"></span>
+      </div>
+      <div class="product-grid" id="vendor-product-grid"></div>
+    </section>
+
     <div class="page-head">
       <div>
         <a href="vendor-dashboard.html" class="back-link">
@@ -123,7 +133,7 @@
             </span>
             <h4>Upload product photo</h4>
             <p>Click or drag &amp; drop an image (PNG, JPG, WEBP)</p>
-            <input type="file" id="product-image" accept="image/png,image/jpeg,image/webp">
+            <input type="file" id="product-image" name="image" accept="image/png,image/jpeg,image/webp">
             <div class="image-preview" id="image-preview">
               <img id="preview-img" src="" alt="Product preview">
               <button type="button" class="remove-image" id="remove-image">×</button>
@@ -136,7 +146,7 @@
         ============================================ -->
         <div class="form-group">
           <label for="product-name">Product name <span class="label-hint">(required)</span></label>
-          <input type="text" id="product-name" class="form-control" placeholder="e.g., Honey oat cookies" required maxlength="100">
+          <input type="text" id="product-name" name="name" class="form-control" placeholder="e.g., Honey oat cookies" required maxlength="100">
         </div>
 
         <!-- ============================================
@@ -145,7 +155,7 @@
         <div class="form-row">
           <div class="form-group">
             <label for="product-category">Category <span class="label-hint">(required)</span></label>
-            <select id="product-category" class="form-control" required>
+            <select id="product-category" name="category" class="form-control" required>
               <option value="">Select category...</option>
               <option value="Food">🍪 Food</option>
               <option value="Beverages">☕ Beverages</option>
@@ -159,7 +169,7 @@
           </div>
           <div class="form-group">
             <label for="product-price">Price (R) <span class="label-hint">(required)</span></label>
-            <input type="number" id="product-price" class="form-control" placeholder="0.00" min="0.01" step="0.01" required>
+            <input type="number" id="product-price" name="price" class="form-control" placeholder="0.00" min="0.01" step="0.01" required>
           </div>
         </div>
 
@@ -168,7 +178,7 @@
         ============================================ -->
         <div class="form-group">
           <label for="product-stock">Stock qty <span class="label-hint">(required)</span></label>
-          <input type="number" id="product-stock" class="form-control" placeholder="e.g., 20" min="0" step="1" required>
+          <input type="number" id="product-stock" name="stock" class="form-control" placeholder="e.g., 20" min="0" step="1" required>
         </div>
 
         <!-- ============================================
@@ -176,7 +186,7 @@
         ============================================ -->
         <div class="form-group">
           <label for="product-description">Description <span class="label-hint">(optional)</span></label>
-          <textarea id="product-description" class="form-control" placeholder="Describe your product..." maxlength="500" rows="4"></textarea>
+          <textarea id="product-description" name="description" class="form-control" placeholder="Describe your product..." maxlength="500" rows="4"></textarea>
           <div class="char-counter">
             <span id="char-count">0</span> / 500
           </div>
@@ -216,7 +226,9 @@
   <!-- ==========================================================
   JAVASCRIPT
   ========================================================== -->
-  <script src="index.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+  <script src="add-product.js"></script>
 
 
 </body>

@@ -101,7 +101,7 @@
 			border-radius: 7px;
 			background: var(--card);
 			color: var(--text);
-			font-size: 12px;
+			font-size: 14px;
 		}
 
 		.period select {
@@ -109,7 +109,7 @@
 			outline: 0;
 			background: transparent;
 			color: inherit;
-			font-size: 12px;
+			font-size: 14px;
 		}
 
 		.tabs {
@@ -126,7 +126,7 @@
 			border-bottom: 2px solid transparent;
 			background: transparent;
 			color: var(--muted);
-			font-size: 11px;
+			font-size: 14px;
 			white-space: nowrap;
 		}
 
@@ -160,7 +160,7 @@
 			outline: 0;
 			background: transparent;
 			color: var(--text);
-			font-size: 11px;
+			font-size: 14px;
 		}
 
 		.search input::placeholder {
@@ -175,7 +175,7 @@
 			border-radius: 7px;
 			background: var(--card);
 			color: var(--text);
-			font-size: 11px;
+			font-size: 14px;
 		}
 
 		.filter:hover,
@@ -193,7 +193,7 @@
 		table {
 			width: 100%;
 			border-collapse: collapse;
-			font-size: 10px;
+			font-size: 14px;
 		}
 
 		th,
@@ -206,7 +206,7 @@
 
 		th {
 			color: var(--muted);
-			font-size: 9px;
+			font-size: 12.5px;
 			font-weight: 500;
 		}
 
@@ -231,7 +231,7 @@
 			display: inline-block;
 			padding: 4px 6px;
 			border-radius: 4px;
-			font-size: 9px;
+			font-size: 12px;
 			font-weight: 600;
 			white-space: nowrap;
 		}
@@ -270,7 +270,7 @@
 			gap: 12px;
 			padding: 14px 12px;
 			color: var(--muted);
-			font-size: 10px;
+			font-size: 12px;
 		}
 
 		.pagination {
@@ -286,7 +286,7 @@
 			border-radius: 5px;
 			background: transparent;
 			color: var(--text);
-			font-size: 10px;
+			font-size: 12px;
 		}
 
 		.page-button.active,
@@ -503,7 +503,7 @@
 
 		<nav>
 			<a href="vendor-dashboard.html">Dashboard</a>
-			<a href="vendor-dashboard.html">Products</a>
+			<a href="add-product.html">Products</a>
 			<a href="vendor-dashboard.html" class="active">Orders</a>
 			<a href="subscription.html">Subscribe</a>
 		</nav>
@@ -518,8 +518,8 @@
 					<path d="M21 12.79A9 9 1 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
 				</svg>
 			</button>
-			<span class="vendor-name">Maya's Kitchen</span>
-			<div class="avatar">M</div>
+			<span class="vendor-name"></span>
+			<div class="avatar"></div>
 		</div>
 	</header>
 	<main class="main">
@@ -542,7 +542,7 @@
 
 		<section class="table-panel">
 			<table>
-				<thead><tr><th>Parcel ID</th><th>Order</th><th>Pickup Point</th><th>Status</th><th>Collection Code</th><th>Date</th></tr></thead>
+				<thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Status</th><th>Amount</th><th>Date</th></tr></thead>
 				<tbody id="shipmentRows"></tbody>
 			</table>
 			<div class="footer-row"><span id="resultCount"></span><div class="pagination" id="pagination"></div></div>
@@ -550,61 +550,8 @@
 
 		<div class="actions"><button class="action primary" id="create" type="button">Unshipped Orders</button></div>
 	</main>
-	<script src="sweetalert2.bundle.js"></script>
-	<script>
-		const themeToggle = document.getElementById('navbar-theme-toggle');
-		const savedTheme = localStorage.getItem('localcart-theme');
-		if (savedTheme === 'light') document.documentElement.dataset.theme = 'light';
-		themeToggle.addEventListener('click', () => {
-			const isLight = document.documentElement.dataset.theme === 'light';
-			document.documentElement.dataset.theme = isLight ? 'dark' : 'light';
-			localStorage.setItem('localcart-theme', isLight ? 'dark' : 'light');
-		});
-
-		const shipments = [
-			{ id:'RD-1045', order:'#1045', point:'Site B Rank', status:'Collected', code:'2841', date:'29 May 2024' },
-			{ id:'RD-1044', order:'#1044', point:'Mitchells Plain Rank', status:'At Rank', code:'6712', date:'29 May 2024' },
-			{ id:'RD-1043', order:'#1043', point:'Nyanga Junction', status:'In Transit', code:'9931', date:'29 May 2024' },
-			{ id:'RD-1042', order:'#1042', point:'Bellville Taxi Rank', status:'Collected', code:'4452', date:'28 May 2024' },
-			{ id:'RD-1041', order:'#1041', point:'14 Main Rd, Claremont', status:'Delivered', code:'–', date:'28 May 2024' },
-			{ id:'RD-1039', order:'#1040', point:'Khayelitsha Mall', status:'At Rank', code:'8210', date:'28 May 2024' },
-			{ id:'RD-1039', order:'#1039', point:'Site B Rank', status:'Processing', code:'–', date:'28 May 2024' },
-			{ id:'RD-1038', order:'#1038', point:'Nyanga Junction', status:'Collected', code:'3321', date:'28 May 2024' },
-			{ id:'RD-1037', order:'#1037', point:'Mitchells Plain Rank', status:'In Transit', code:'7762', date:'28 May 2024' },
-			{ id:'RD-1036', order:'#1036', point:'Site B Rank', status:'Collected', code:'1103', date:'27 May 2024' }
-		];
-		const trackedShipmentsKey = 'localcart-tracked-shipments';
-		const savedShipments = JSON.parse(localStorage.getItem(trackedShipmentsKey) || '[]').map(item => ({
-			id: item.id,
-			order: item.order,
-			point: item.point,
-			status: 'Processing',
-			code: item.code || '–',
-			date: item.date
-		}));
-		shipments.unshift(...savedShipments.filter(saved => !shipments.some(item => item.order === saved.order)));
-		const rows = document.getElementById('shipmentRows');
-		const search = document.getElementById('search');
-		let activeStatus = 'All';
-		function showAlert(title, text, icon = 'info') {
-			if (typeof Swal !== 'undefined') Swal.fire({ icon, title, text, background:'#1b1b1d', color:'#f5f5f5', confirmButtonColor:'#f5821f' });
-			else alert(`${title}\n\n${text}`);
-		}
-		function statusClass(status) { return status.toLowerCase().replace(' ', '-'); }
-		function render() {
-			const query = search.value.trim().toLowerCase();
-			const filtered = shipments.filter(item => (activeStatus === 'All' || item.status === activeStatus) && `${item.id} ${item.order} ${item.point} ${item.status}`.toLowerCase().includes(query));
-			rows.innerHTML = filtered.length ? filtered.map(item => `<tr><td class="parcel">${item.id}</td><td>${item.order}</td><td class="pickup">${item.point}</td><td><span class="status ${statusClass(item.status)}">${item.status}</span></td><td>${item.code}</td><td>${item.date}⌄</td></tr>`).join('') : '<tr><td class="empty" colspan="6">No shipments match your search.</td></tr>';
-			document.getElementById('resultCount').textContent = `Showing ${filtered.length ? 1 : 0} to ${filtered.length} of 142 shipments`;
-			document.getElementById('pagination').innerHTML = '<button class="page-button" type="button">‹</button><button class="page-button active" type="button">1</button><button class="page-button" type="button">2</button><button class="page-button" type="button">3</button><span>...</span><button class="page-button" type="button">15</button><button class="page-button" type="button">›</button>';
-		}
-		document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => { document.querySelector('.tab.active').classList.remove('active'); tab.classList.add('active'); activeStatus = tab.dataset.status; render(); }));
-		search.addEventListener('input', render);
-		document.querySelector('.back').addEventListener('click', () => { window.location.href = 'vendor-dashboard.html'; });
-		document.getElementById('period').addEventListener('change', event => showAlert('Date range updated', `Showing shipments for ${event.target.value}.`));
-		document.getElementById('filterButton').addEventListener('click', () => showAlert('Filters', 'Use the status tabs or search field to narrow the shipment list.'));
-		document.getElementById('create').addEventListener('click', () => { window.location.href = 'createshipment.html'; });
-		render();
-	</script>
+	<script src="api.js"></script>
+	<script src="app.js"></script>
+	<script src="deliverytracker.js"></script>
 </body>
 </html>

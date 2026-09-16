@@ -6,7 +6,9 @@
 <title>LocalCart</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="sweetalert2.bundle.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+  <script src="sweetalert2.bundle.js"></script>
 <style>
   :root {
     --bg-page: #0f0f10;
@@ -664,8 +666,8 @@
     });
   });
 
-  // Backend API base URL — matches checkout.js
-  const API_URL = 'http://localhost:5000/api';
+  // Backend API base URL. Override with window.LOCALCART_API_URL when needed.
+  const API_URL = window.LOCALCART_API_URL || 'http://localhost:5000/api';
 
   // Safe wrapper: if the local SweetAlert2 script failed to load,
   // this falls back to a plain browser alert instead of failing silently.
@@ -684,6 +686,13 @@
       alert(`${title}\n\n${text}`);
       return Promise.resolve();
     }
+  }
+
+  function isVendorAccount(user) {
+    if (!user) return false;
+    const vendorFlag = String(user.is_vendor ?? '').toLowerCase();
+    const role = String(user.role || user.user_type || '').toLowerCase();
+    return user.vendor_id != null || user.vendorId != null || user.vendor?.id != null || vendorFlag === 'true' || vendorFlag === '1' || role === 'vendor';
   }
 
   document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -717,8 +726,21 @@
         icon: 'success',
         title: 'Logged in!',
         text: `Welcome back, ${result.user.name}.`
-      }).then(() => {
-        window.location.href = result.user.is_vendor
+      }).then(async () => {
+        let vendorAccount = isVendorAccount(result.user);
+        if (!vendorAccount) {
+          try {
+            const userResponse = await fetch(`${API_URL}/auth/me`, {
+              headers: { Authorization: `Bearer ${result.token}` }
+            });
+            if (userResponse.ok) {
+              const currentUser = await userResponse.json();
+              vendorAccount = isVendorAccount(currentUser.user || currentUser.data || currentUser);
+            }
+          } catch {}
+        }
+
+        window.location.href = vendorAccount
           ? 'vendor-dashboard.html'
           : 'index.html';
       });
@@ -781,7 +803,16 @@
         ownerId: ownerId,
         ownerName: ownerName,
         vendCity: vendCity,
-        vendProvince: vendProvince
+        vendProvince: vendProvince,
+        role: 'vendor',
+        user_type: 'vendor',
+        store_name: storeName,
+        store_email: storeEmail,
+        store_phone: storePhone,
+        owner_id: ownerId,
+        owner_name: ownerName,
+        vendor_name: storeName,
+        vendor_email: storeEmail
       };
     } else {
       const password = document.getElementById('custPassword').value;

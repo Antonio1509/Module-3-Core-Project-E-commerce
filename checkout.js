@@ -1,10 +1,10 @@
 // API Configuration
-const API_URL = 'http://localhost:5000/api';
+const API_URL = window.LOCALCART_API_URL || 'http://localhost:5000/api';
 
 // Load cart data from sessionStorage
 let cartData = null;
-let orderTotal = 615.00;
-let totalItems = 3;
+let orderTotal = 0;
+let totalItems = 0;
 
 // =========================================================
 // Get Auth Token
@@ -61,19 +61,24 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    loadCartData();
+    if (new URLSearchParams(window.location.search).get('subscription') === 'true') {
+        loadSubscriptionCheckout();
+        activateReturnedSubscription();
+    } else {
+        loadCartData();
+    }
     
     // Theme toggle
     const themeToggle = document.getElementById('theme-toggle');
     if (themeToggle) {
-        const currentTheme = localStorage.getItem('theme') || 'dark';
+        const currentTheme = localStorage.getItem('localcart-theme') || 'light';
         document.documentElement.setAttribute('data-theme', currentTheme);
         
         themeToggle.addEventListener('click', function() {
             const current = document.documentElement.getAttribute('data-theme');
             const newTheme = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
+            localStorage.setItem('localcart-theme', newTheme);
         });
     }
     
@@ -83,6 +88,74 @@ document.addEventListener('DOMContentLoaded', function() {
         placeOrderBtn.addEventListener('click', placeOrder);
     }
 });
+
+async function activateReturnedSubscription() {
+    const params = new URLSearchParams(window.location.search);
+    const returnedSuccessfully = ['success', 'COMPLETE', 'completed'].includes(params.get('payment') || params.get('status') || params.get('payment_status'));
+    const pending = JSON.parse(localStorage.getItem('pendingSubscription') || 'null');
+    if (!returnedSuccessfully || !pending) return;
+
+    try {
+        const response = await apiCall('/subscriptions/subscribe', {
+            method: 'POST',
+            body: JSON.stringify({ planSlug: pending.plan, price: Number(pending.price || 0), billingPeriod: pending.period || 'monthly' })
+        });
+        if (!response.success && response.error) throw new Error(response.error);
+        localStorage.removeItem('pendingSubscription');
+        Swal.fire({ icon: 'success', title: 'Subscription activated', text: 'Your vendor plan is now active.', confirmButtonColor: '#2d6a4f' })
+            .then(() => { window.location.href = 'vendor-dashboard.html'; });
+    } catch (error) {
+        Swal.fire({ icon: 'error', title: 'Subscription confirmation failed', text: error.message || 'Could not activate your plan.', confirmButtonColor: '#2d6a4f' });
+    }
+}
+
+function loadSubscriptionCheckout() {
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan') || 'Subscription';
+    const price = Number(params.get('price') || 0);
+    const period = params.get('period') === 'yearly' ? 'year' : 'month';
+    const summary = document.getElementById('subscriptionSummary');
+    const planName = document.getElementById('selectedPlanName');
+    const planPrice = document.getElementById('selectedPlanPrice');
+    const itemSummary = document.getElementById('cartItemsSummary');
+    const deliveryRow = document.getElementById('deliverySummary');
+    const total = document.querySelector('.total-amount');
+    const placeOrderButton = document.getElementById('placeOrderBtn');
+
+    document.getElementById('checkoutForm').hidden = true;
+    document.getElementById('subscriptionForm').hidden = false;
+    const user = getStoredUser() || {};
+    document.getElementById('vendorFullName').value = user.name || '';
+    document.getElementById('vendorBusinessName').value = user.business_name || user.store_name || '';
+    document.getElementById('vendorEmail').value = user.email || '';
+    document.getElementById('vendorPhone').value = user.phone || '';
+    document.getElementById('vendorBillingAddress').value = [user.street, user.city, user.province].filter(Boolean).join(', ');
+    document.querySelector('.page-title').textContent = 'Subscription checkout';
+    summary.hidden = false;
+    planName.textContent = plan;
+    planPrice.textContent = `R${price.toFixed(2)} / ${period}`;
+    if (itemSummary) itemSummary.hidden = true;
+    if (deliveryRow) deliveryRow.hidden = true;
+    orderTotal = price;
+    if (total) total.textContent = `R${price.toFixed(2)}`;
+    if (placeOrderButton) placeOrderButton.textContent = 'Subscribe with PayFast';
+    renderVendorCheckoutNavigation();
+}
+
+function renderVendorCheckoutNavigation() {
+    const header = document.querySelector('body > header');
+    const nav = header?.querySelector('nav');
+    const logo = header?.querySelector('.logo');
+    if (!header || !nav) return;
+    if (logo && !logo.querySelector('.logo-tag')) {
+        logo.insertAdjacentHTML('beforeend', ' <span class="logo-tag">for Vendors</span>');
+    }
+    nav.innerHTML = `
+        <a href="vendor-dashboard.html">Dashboard</a>
+        <a href="add-product.html">Products</a>
+        <a href="deliverytracker.html">Orders</a>
+        <a href="subscription.html" class="active">Subscribe</a>`;
+}
 
 // =========================================================
 // LOAD CART DATA FROM BACKEND
@@ -134,17 +207,16 @@ function updateOrderSummary(cartInfo) {
     
     const items = cartInfo.items || [];
     const subtotal = cartInfo.subtotal || items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const delivery = cartInfo.delivery_fee || cartInfo.delivery || 60;
+    const delivery = Number(cartInfo.delivery_fee || cartInfo.delivery || 0);
     orderTotal = subtotal + delivery;
     totalItems = cartInfo.total_items || items.reduce((sum, item) => sum + item.quantity, 0);
     
     const summaryRows = document.querySelectorAll('.summary-row');
     if (summaryRows.length >= 3) {
-        const itemsSpan = summaryRows[0].querySelectorAll('span');
-        if (itemsSpan.length >= 2) {
-            itemsSpan[0].textContent = `${totalItems} items`;
-            itemsSpan[1].textContent = `R${subtotal.toFixed(2)}`;
-        }
+        const itemsSummary = document.getElementById('cartItemsSummary');
+        const deliverySummary = document.getElementById('deliverySummary');
+        if (itemsSummary) itemsSummary.innerHTML = `<span>${totalItems} items</span><span>R${subtotal.toFixed(2)}</span>`;
+        if (deliverySummary) deliverySummary.innerHTML = `<span>Delivery</span><span>R${delivery.toFixed(2)}</span>`;
         
         const totalRow = summaryRows[2];
         const totalAmount = totalRow.querySelector('.total-amount');
@@ -177,6 +249,90 @@ async function placeOrder(e) {
         return;
     }
 
+    const subscriptionParams = new URLSearchParams(window.location.search);
+    if (subscriptionParams.get('subscription') === 'true') {
+        const vendorFullName = document.getElementById('vendorFullName').value.trim();
+        const vendorBusinessName = document.getElementById('vendorBusinessName').value.trim();
+        const vendorEmail = document.getElementById('vendorEmail').value.trim();
+        const vendorPhone = document.getElementById('vendorPhone').value.trim();
+        const vendorBillingAddress = document.getElementById('vendorBillingAddress').value.trim();
+        if (!vendorFullName || !vendorBusinessName || !vendorEmail || !vendorPhone || !vendorBillingAddress) {
+            Swal.fire({ icon: 'warning', title: 'Complete your details', text: 'Please fill in all vendor payment details before continuing.', confirmButtonColor: '#2d6a4f' });
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(vendorEmail)) {
+            Swal.fire({ icon: 'warning', title: 'Invalid email', text: 'Please enter a valid email address.', confirmButtonColor: '#2d6a4f' });
+            return;
+        }
+        const subscriptionOrderNumber = `SUB-${Date.now()}`;
+        Swal.fire({
+            title: 'Preparing PayFast...',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+        try {
+            const paymentResponse = await apiCall('/payment/initiate', {
+                method: 'POST',
+                body: JSON.stringify({
+                    paymentType: 'subscription',
+                    payment_type: 'subscription',
+                    orderNumber: subscriptionOrderNumber,
+                    order_number: subscriptionOrderNumber,
+                    planSlug: subscriptionParams.get('plan'),
+                    plan_slug: subscriptionParams.get('plan'),
+                    totalAmount: Number(subscriptionParams.get('price') || 0),
+                    total_amount: Number(subscriptionParams.get('price') || 0),
+                    amount: Number(subscriptionParams.get('price') || 0),
+                    paymentMethod: 'payfast',
+                    payment_method: 'payfast',
+                    billingPeriod: subscriptionParams.get('period') || 'monthly',
+                    billing_period: subscriptionParams.get('period') || 'monthly',
+                    customerName: vendorFullName,
+                    customer_name: vendorFullName,
+                    customerEmail: vendorEmail,
+                    customer_email: vendorEmail,
+                    full_name: vendorFullName,
+                    business_name: vendorBusinessName,
+                    phone: vendorPhone,
+                    billing_address: vendorBillingAddress,
+                    item_name: `${subscriptionParams.get('plan') || 'LocalCart'} vendor subscription`,
+                    description: `${vendorBusinessName} subscription`,
+                    returnUrl: `${window.location.origin}${window.location.pathname}?${subscriptionParams.toString()}&payment=success`,
+                    cancelUrl: `${window.location.origin}${window.location.pathname}?${subscriptionParams.toString()}&payment=cancelled`,
+                    return_url: `${window.location.origin}${window.location.pathname}?${subscriptionParams.toString()}&payment=success`,
+                    cancel_url: `${window.location.origin}${window.location.pathname}?${subscriptionParams.toString()}&payment=cancelled`
+                })
+            });
+            if (!paymentResponse.success) {
+                throw new Error(paymentResponse.error || 'Could not prepare PayFast payment.');
+            }
+            const payment = paymentResponse.data || paymentResponse;
+            if (!payment.payfastUrl || !payment.paymentData) {
+                throw new Error('PayFast payment details were not returned by the server.');
+            }
+            localStorage.setItem('pendingSubscription', JSON.stringify({
+                plan: subscriptionParams.get('plan'),
+                price: subscriptionParams.get('price'),
+                period: subscriptionParams.get('period')
+            }));
+            const paymentForm = document.createElement('form');
+            paymentForm.method = 'POST';
+            paymentForm.action = payment.payfastUrl;
+            Object.entries(payment.paymentData).forEach(([key, value]) => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = value;
+                paymentForm.appendChild(input);
+            });
+            document.body.appendChild(paymentForm);
+            paymentForm.submit();
+        } catch (error) {
+            Swal.fire({ icon: 'error', title: 'Subscription failed', text: error.message || 'Could not activate subscription.', confirmButtonColor: '#2d6a4f' });
+        }
+        return;
+    }
+
     // ============================================================
     // Get Form Values
     // ============================================================
@@ -184,11 +340,12 @@ async function placeOrder(e) {
     const email = document.getElementById('email')?.value.trim() || '';
     const address = document.getElementById('streetAddress').value.trim();
     const city = document.getElementById('city').value.trim();
+    const postalCode = document.getElementById('postalCode').value.trim();
 
     // ============================================================
     // Validation
     // ============================================================
-    if (!fullName || !address || !city) {
+    if (!fullName || !address || !city || !postalCode) {
         Swal.fire({
             icon: 'warning',
             title: 'Incomplete Delivery Address',
@@ -227,7 +384,7 @@ async function placeOrder(e) {
             body: JSON.stringify({
                 shipping_address: address,
                 city: city,
-                postal_code: '8001',
+                postal_code: postalCode,
                 payment_method: 'payfast',
                 full_name: fullName,
                 email: email
@@ -269,21 +426,7 @@ async function placeOrder(e) {
         // ============================================================
         // Save Order Data for Confirmation Page
         // ============================================================
-        const orderData = {
-            orderNumber: orderNumber,
-            fullName: fullName,
-            email: email,
-            address: address,
-            city: city,
-            total: `R${orderTotal.toFixed(2)}`,
-            totalAmount: orderTotal,
-            items: cartData?.items || [],
-            itemCount: totalItems,
-            paymentMethod: 'payfast',
-            deliveryEstimate: '2-4 business days'
-        };
-
-        localStorage.setItem('orderData', JSON.stringify(orderData));
+        localStorage.setItem('pendingOrderNumber', orderNumber);
 
         // ============================================================
         // Redirect to PayFast

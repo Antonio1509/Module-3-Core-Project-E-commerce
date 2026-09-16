@@ -908,15 +908,10 @@
     localStorage.setItem('localcart-theme', isLight ? 'dark' : 'light');
   });
 
-  document.querySelectorAll('.plan-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const btn = card.querySelector('.choose-btn');
-      const plan = btn.dataset.plan;
-      const price = btn.dataset.price;
-      window.location.href = `checkout.html?plan=${encodeURIComponent(plan)}&price=${encodeURIComponent(price)}`;
-    });
-  });
 </script>
 
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+  <script src="subscription.js"></script>
 </body>
 </html>

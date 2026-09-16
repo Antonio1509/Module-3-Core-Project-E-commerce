@@ -9,13 +9,13 @@
 <style>
   * { box-sizing: border-box; }
   :root{
-    --bg-page: #0f0f10;
-    --bg-card: #1b1b1d;
-    --bg-field: #2a2a2d;
-    --border-default: #3a3a3d;
-    --text-primary: #f5f5f5;
-    --text-secondary: #9a9a9d;
-    --text-muted: #6f6f72;
+    --bg-page: #ffffff;
+    --bg-card: #ffffff;
+    --bg-field: #f2f2f2;
+    --border-default: #d0d0d0;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --text-muted: #666666;
     --accent: #f5821f;
     --bg: var(--bg-page);
     --panel: var(--bg-card);
@@ -33,9 +33,7 @@
     margin:0;
     min-height:100vh;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background:
-      radial-gradient(circle at 75% 15%, rgba(245, 130, 31, 0.06), transparent 28%),
-      linear-gradient(135deg, #0f0f10 0%, #111113 55%, #171719 100%);
+    background: #ffffff;
     color:var(--text);
   }
   button,input{font:inherit}
@@ -55,7 +53,7 @@
   .circle{width:40px;height:40px;border-radius:50%;border:1px solid var(--text-muted);display:grid;place-items:center;flex:none;font-weight:700}
   .done .circle{background:var(--accent);border-color:var(--accent);color:#111;font-size:21px}
   .active .circle{background:var(--blue);border-color:var(--blue)}
-  .active{color:#fff;font-weight:650}
+  .active{color:var(--text-primary);font-weight:650}
   .searchrow{display:grid;grid-template-columns:1fr 294px;gap:14px;margin-bottom:24px}
   .searchbox,.locationbtn{
     height:62px;border:1px solid var(--border);border-radius:11px;background:var(--bg-field);color:var(--text-primary);
@@ -99,7 +97,7 @@
   }
   .mapcard{
     position:absolute;right:20px;top:30px;width:345px;padding:27px;border-radius:13px;
-    background:rgba(27,27,29,.96);border:1px solid var(--border-default);z-index:5;
+    background:rgba(255,255,255,.96);border:1px solid var(--border-default);z-index:5;
   }
   .mapcard h2{margin:0 0 7px;font-size:25px}.mapcard .place{color:var(--text-secondary);margin-bottom:19px}
   .recommended{float:right;background:var(--accent);color:#111;padding:6px 10px;border-radius:6px;font-size:12px}
@@ -136,6 +134,7 @@
   }
 
   .theme-toggle{width:36px;height:36px;border:1px solid var(--border);border-radius:50%;background:var(--panel);color:var(--text);cursor:pointer}
+  [data-theme="light"] body{background:#ffffff;color:#000000}
   .theme-toggle .icon-moon{display:none}
   [data-theme="light"]{
     --bg-page:#ffffff;
@@ -152,11 +151,17 @@
     --text:#000000;
     --muted:#333333;
   }
-  [data-theme="light"] body{background:#ffffff;color:#000000}
   [data-theme="light"] .active{color:#000000}
   [data-theme="light"] .theme-toggle .icon-sun{display:none}
   [data-theme="light"] .theme-toggle .icon-moon{display:inline}
   [data-theme="light"] .mapcard{background:rgba(255,255,255,.96);border-color:#d0d0d0}
+  [data-theme="dark"]{
+    --bg-page:#0f0f10;--bg-card:#1b1b1d;--bg-field:#2a2a2d;--border-default:#3a3a3d;
+    --text-primary:#f5f5f5;--text-secondary:#9a9a9d;--text-muted:#6f6f72;
+    --bg:var(--bg-page);--panel:var(--bg-card);--panel2:var(--bg-field);--border:var(--border-default);--text:var(--text-primary);--muted:var(--text-secondary);
+  }
+  [data-theme="dark"] body{background:linear-gradient(135deg,#0f0f10 0%,#111113 55%,#171719 100%);color:var(--text-primary)}
+  [data-theme="dark"] .mapcard{background:rgba(27,27,29,.96)}
 </style>
 </head>
 <body>
@@ -210,7 +215,9 @@
   <div class="notice"><span>i</span>You’ll receive an SMS and WhatsApp when your parcel is ready for collection.</div>
 </div>
 
-<script src="sweetalert2.bundle.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+  <script src="sweetalert2.bundle.js"></script>
 <script>
 const themeToggle = document.getElementById("theme-toggle");
 const savedTheme = localStorage.getItem("localcart-theme");

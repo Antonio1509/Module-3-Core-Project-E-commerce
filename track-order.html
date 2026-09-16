@@ -8,7 +8,7 @@
       href="https://i.ibb.co/LWW04LT/logo.png"
       type="image/png"
     />
-    <title>Track order · LC-10482</title>
+    <title>Track order · LocalCart</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -31,7 +31,6 @@
         <a href="vendors.html">Vendors</a>
         <a href="about.html">About</a>
         <a href="contact.html">Contact</a>
-        <a href="subscription.html">Subscribe</a>
       </nav>
 
       <div class="header-right">
@@ -191,9 +190,9 @@
         <!-- HEADER -->
         <div class="track-header">
           <h1 class="track-title">
-            Track order <span class="order-id">#LC-10482</span>
+            Track order <span class="order-id"></span>
           </h1>
-          <p class="track-date">Placed 25 August 2026</p>
+          <p class="track-date"></p>
         </div>
 
         <!-- TIMELINE WITH PROFESSIONAL ICONS -->
@@ -272,7 +271,7 @@
         <div class="items-section">
           <h2 class="items-title">Items in this order</h2>
           <ul class="items-list">
-            <li>
+            <li hidden>
               <span class="item-icon-box" style="background: #c08a34;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
@@ -283,7 +282,7 @@
               <span class="item-name">Honey oat cookies</span>
               <span class="item-vendor">Maya's Kitchen</span>
             </li>
-            <li>
+            <li hidden>
               <span class="item-icon-box" style="background: #40916c;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
@@ -294,7 +293,7 @@
               <span class="item-name">Shea body butter</span>
               <span class="item-vendor">Pure Roots Skincare</span>
             </li>
-            <li>
+            <li hidden>
               <span class="item-icon-box" style="background: #3a6ea5;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
@@ -306,6 +305,9 @@
               <span class="item-vendor">Thandi Designs</span>
             </li>
           </ul>
+        </div>
+        <div class="track-actions">
+          <a class="btn-continue" href="index.html">Back to shop</a>
         </div>
       </div>
     </main>
@@ -387,6 +389,8 @@
   </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="api.js"></script>
+    <script src="app.js"></script>
     <script src="track-order.js"></script>
 
   </body>

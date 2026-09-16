@@ -49,6 +49,9 @@
 		.back:hover { border-color: var(--accent); color: var(--accent); }
 		h1 { margin: 0 0 7px; font-size: 25px; letter-spacing: -.5px; }
 		.intro { margin: 0; color: var(--muted); font-size: 12px; }
+		.vendor-tools-nav { display: flex; gap: 14px; margin-top: 10px; }
+		.vendor-tools-nav a { color: var(--muted); font-size: 11px; text-decoration: none; }
+		.vendor-tools-nav a:hover { color: var(--accent); }
 		.period { display: flex; align-items: center; gap: 9px; padding: 9px 11px; border: 1px solid var(--border); border-radius: 7px; background: var(--card); color: var(--text); font-size: 12px; }
 		.select-wrap { position: relative; display: inline-flex; align-items: center; }
 		.select-wrap::after {
@@ -168,7 +171,7 @@
 	<div class="dashboard">
 		<main class="main">
 			<header class="topbar">
-					<div class="heading-group"><button class="back" type="button" aria-label="Back to pickup points">←</button><div><h1>RankDrop Overview</h1><p class="intro">Track your RankDrop performance and parcel activity.</p></div></div>
+					<div class="heading-group"><button class="back" type="button" aria-label="Back to pickup points">←</button><div><h1>RankDrop Overview</h1><p class="intro">Track your RankDrop performance and parcel activity.</p><nav class="vendor-tools-nav"><a href="vendor-dashboard.html">Dashboard</a><a href="add-product.html">Products</a><a href="deliverytracker.html">Orders</a><a href="subscription.html">Subscribe</a></nav></div></div>
 				<label class="period">Month <span class="select-wrap"><select id="period"><option>January</option><option>February</option><option>March</option><option>April</option><option>May</option><option>June</option><option>July</option><option>August</option><option>September</option><option>October</option><option>November</option><option>December</option></select></span></label>
 				<button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light and dark mode"><svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg><svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 1 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg></button>
 			</header>
@@ -198,6 +201,8 @@
 			<section class="panel activity"><div class="panel-heading"><h2>Recent RankDrop Activity</h2><a class="activity-link" href="deliverytracker.html">View all shipments</a></div><table><thead><tr><th>Parcel ID</th><th>Order</th><th>Pickup Point</th><th>Status</th><th>Time</th></tr></thead><tbody><tr><td>RD-1045</td><td>#1045</td><td>Site B Rank</td><td><span class="status collected">Collected</span></td><td>29 May, 15:41</td></tr><tr><td>RD-1044</td><td>#1044</td><td>Mitchells Plain Rank</td><td><span class="status at-rank">At Rank</span></td><td>29 May, 13:22</td></tr><tr><td>RD-1043</td><td>#1043</td><td>Nyanga Junction</td><td><span class="status transit">In Transit</span></td><td>29 May, 09:18</td></tr><tr><td>RD-1042</td><td>#1042</td><td>Bellville Taxi Rank</td><td><span class="status collected">Collected</span></td><td>28 May, 18:03</td></tr></tbody></table></section>
 		</main>
 	</div>
+	<script src="api.js"></script>
+	<script src="app.js"></script>
 	<script src="sweetalert2.bundle.js"></script>
 	<script>
 		const themeToggle = document.getElementById('theme-toggle');

@@ -18,6 +18,9 @@
     .back:hover { border-color:var(--accent); color:var(--accent); }
     h1 { margin:0 0 7px; font-size:25px; letter-spacing:-.5px; }
     .intro { margin:0; color:var(--muted); font-size:12px; }
+    .vendor-tools-nav { display:flex; gap:14px; margin-top:10px; }
+    .vendor-tools-nav a { color:var(--muted); font-size:11px; text-decoration:none; }
+    .vendor-tools-nav a:hover { color:var(--accent); }
     .toolbar { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:16px; }
     .toolbar h2 { margin:0; font-size:14px; }
     .toolbar-controls { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -103,7 +106,7 @@
   <main class="main">
     <header class="topbar">
       <button class="back" type="button" aria-label="Back to shipments">←</button>
-      <div><h1>Create Shipment</h1><p class="intro">Select an unshipped customer order to create a RankDrop shipment.</p></div>
+      <div><h1>Create Shipment</h1><p class="intro">Select an unshipped customer order to create a RankDrop shipment.</p><nav class="vendor-tools-nav"><a href="vendor-dashboard.html">Dashboard</a><a href="add-product.html">Products</a><a href="deliverytracker.html">Orders</a><a href="subscription.html">Subscribe</a></nav></div>
       <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light and dark mode"><svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l-1.41-1.41M17.66 6.34l-1.41-1.41"></path></svg><svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg></button>
     </header>
 
@@ -126,8 +129,10 @@
     <p class="footer">Default ordering is by order number, newest first. Click an order number to view its items.</p>
   </main>
 
+  <script src="api.js"></script>
+  <script src="app.js"></script>
   <script src="sweetalert2.bundle.js"></script>
-  <script>
+  <script type="application/json" aria-hidden="true">
     const themeToggle = document.getElementById('theme-toggle');
     const savedTheme = localStorage.getItem('localcart-theme');
     if (savedTheme === 'light') document.documentElement.dataset.theme = 'light';
@@ -236,5 +241,6 @@
     document.querySelector('.back').addEventListener('click', () => { window.location.href = 'deliverytracker.html'; });
     render();
   </script>
+  <script src="createshipment.js"></script>
 </body>
 </html>

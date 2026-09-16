@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8" />
@@ -47,6 +47,9 @@
       </svg>
       <input type="text" id="search-input" placeholder="Search products…" aria-label="Search products" />
     </label>
+    <button class="icon-btn" id="clear-search" type="button" aria-label="Clear product search" hidden>
+      <span aria-hidden="true">×</span>
+    </button>
 
     <button class="icon-btn" aria-label="Cart" onclick="window.location.href='cart.html'">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -58,14 +61,14 @@
 
     <div class="profile-dropdown-wrap">
       <button class="profile-toggle" id="profile-toggle" aria-haspopup="true" aria-expanded="false" aria-label="Open profile menu">
-        <div class="avatar">TM</div>
+        <div class="avatar"></div>
       </button>
       <div class="profile-dropdown" id="profile-dropdown">
         <div class="profile-dropdown-header">
-          <div class="avatar">TM</div>
+          <div class="avatar"></div>
           <div>
-            <strong data-profile-name>Thabo Mokoena</strong>
-            <span data-profile-email>thabo@example.com</span>
+            <strong data-profile-name></strong>
+            <span data-profile-email></span>
           </div>
         </div>
         <div class="profile-dropdown-links">
@@ -92,7 +95,7 @@
   <!-- ================= HERO ================= -->
   <section class="hero">
 
-    <h1>Welcome back, Thandiwe</h1>
+    <h1>Welcome to LocalCart</h1>
 
     <p>
       Discover new products from your favorite local South African artisans
@@ -878,7 +881,11 @@
 
 
   <!-- JavaScript -->
+  <script src="api.js"></script>
+  <script src="app.js"></script>
   <script src="index.js"></script>
+  <script src="home-api.js"></script>
+  <script src="product-details.js"></script>
 
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,7 +18,7 @@
 
     <nav>
       <a href="vendor-dashboard.html" class="active">Dashboard</a>
-      <a href="vendor-dashboard.html">Products</a>
+      <a href="add-product.html">Products</a>
       <a href="deliverytracker.html">Orders</a>
       <a href="subscription.html">Subscribe</a>
     </nav>
@@ -34,15 +34,15 @@
         </svg>
       </button>
 
-      <span class="vendor-name">Maya's Kitchen</span>
-      <div class="avatar">M</div>
+      <span class="vendor-name"></span>
+      <div class="avatar"></div>
     </div>
   </header>
 
   <main class="vendor-main">
     <div class="vendor-page-head">
       <div>
-        <h1>Welcome back, Maya's Kitchen</h1>
+        <h1 id="vendor-welcome">Welcome back</h1>
         <p>Here's how your shop is doing</p>
       </div>
       <button class="btn-primary" id="add-product-btn">
@@ -54,20 +54,7 @@
       </button>
     </div>
 
-    <div class="vendor-stats">
-      <div class="vendor-stat-card">
-        <div class="vendor-stat-label">Sales this month</div>
-        <div class="vendor-stat-value accent">R4,280</div>
-      </div>
-      <div class="vendor-stat-card">
-        <div class="vendor-stat-label">Orders</div>
-        <div class="vendor-stat-value">38</div>
-      </div>
-      <div class="vendor-stat-card">
-        <div class="vendor-stat-label">Rating</div>
-        <div class="vendor-stat-value">4.8<span class="stat-suffix">/ 5</span></div>
-      </div>
-    </div>
+    <div class="vendor-stats" id="vendor-stats"></div>
 
     <h2 class="section-title">Recent orders</h2>
     <div class="orders-card">
@@ -80,26 +67,7 @@
             <th class="num">Amount</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td class="order-id">#LC-10482</td>
-            <td>Honey oat cookies x2</td>
-            <td><span class="status-pill status-packing">Packing</span></td>
-            <td class="num amount">R170.00</td>
-          </tr>
-          <tr>
-            <td class="order-id">#LC-10475</td>
-            <td>Ginger snap box</td>
-            <td><span class="status-pill status-delivered">Delivered</span></td>
-            <td class="num amount">R95.00</td>
-          </tr>
-          <tr>
-            <td class="order-id">#LC-10461</td>
-            <td>Honey oat cookies x1</td>
-            <td><span class="status-pill status-delivered">Delivered</span></td>
-            <td class="num amount">R85.00</td>
-          </tr>
-        </tbody>
+        <tbody id="vendor-orders"></tbody>
       </table>
     </div>
 
@@ -117,7 +85,9 @@
     </div>
   </main>
 
-  <script src="index.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
+  <script src="vendor-dashboard.js"></script>
 
 </body>
 </html>
