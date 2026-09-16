@@ -14,6 +14,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
     />
+  <link rel="stylesheet" href="mobile.css" />
   </head>
   <body>
     <!-- Header -->
@@ -222,17 +223,15 @@
             <div class="detail-grid">
               <div class="detail-item">
                 <span class="label">Total paid</span>
-                <span class="value" id="totalPaid">R615.00</span>
+                <span class="value" id="totalPaid"></span>
               </div>
               <div class="detail-item">
                 <span class="label">Items</span>
-                <span class="value" id="itemCount">3 from 3 vendors</span>
+                <span class="value" id="itemCount"></span>
               </div>
               <div class="detail-item">
                 <span class="label">Estimated delivery</span>
-                <span class="value" id="deliveryEstimate"
-                  >2-4 business days</span
-                >
+                <span class="value" id="deliveryEstimate"></span>
               </div>
             </div>
           </div>
@@ -241,7 +240,7 @@
           <div class="order-items">
             <h3>Items in this order</h3>
             <div class="items-list">
-              <div class="order-item">
+                <div class="order-item" hidden>
                 <span class="item-icon">
                   <svg
                     width="24"
@@ -259,11 +258,11 @@
                   </svg>
                 </span>
                 <div class="item-info">
-                  <span class="item-name">Honey oat cookies</span>
-                  <span class="item-vendor">Maya's Kitchen</span>
+                  <span class="item-name"></span>
+                  <span class="item-vendor"></span>
                 </div>
               </div>
-              <div class="order-item">
+                <div class="order-item" hidden>
                 <span class="item-icon">
                   <svg
                     width="24"
@@ -281,11 +280,11 @@
                   </svg>
                 </span>
                 <div class="item-info">
-                  <span class="item-name">Shea body butter</span>
-                  <span class="item-vendor">Pure Roots Skincare</span>
+                  <span class="item-name"></span>
+                  <span class="item-vendor"></span>
                 </div>
               </div>
-              <div class="order-item">
+                <div class="order-item" hidden>
                 <span class="item-icon">
                   <svg
                     width="24"
@@ -303,8 +302,8 @@
                   </svg>
                 </span>
                 <div class="item-info">
-                  <span class="item-name">Beaded tote bag</span>
-                  <span class="item-vendor">Thandi Designs</span>
+                  <span class="item-name"></span>
+                  <span class="item-vendor"></span>
                 </div>
               </div>
             </div>

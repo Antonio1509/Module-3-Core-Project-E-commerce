@@ -1,557 +1,809 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>LocalCart - RankDrop Shipments</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-	<style>
-		:root {
-			--page: #0f0f10;
-			--card: #1b1b1d;
-			--card-soft: #202023;
-			--field: #2a2a2d;
-			--border: #303034;
-			--text: #f5f5f5;
-			--muted: #9a9a9d;
-			--faint: #6f6f72;
-			--accent: #f5821f;
-			--green: #36c978;
-			--blue: #4d91ff;
-			--purple: #9b72df;
-		}
-
-		* {
-			box-sizing: border-box;
-		}
-
-		body {
-			margin: 0;
-			min-height: 100vh;
-			background: var(--page);
-			color: var(--text);
-			font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-		}
-
-		button,
-		input,
-		select {
-			font: inherit;
-		}
-
-		button {
-			cursor: pointer;
-		}
-
-		.main {
-			width: min(100%, 1120px);
-			margin: 0 auto;
-			padding: 30px 34px 50px;
-		}
-
-		.topbar {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 20px;
-			margin-bottom: 50px;
-		}
-
-		.heading-group {
-			display: flex;
-			align-items: center;
-			gap: 18px;
-		}
-
-		.back {
-			width: 48px;
-			height: 48px;
-			border: 1px solid var(--border);
-			border-radius: 50%;
-			background: var(--field);
-			color: var(--text);
-			font-size: 27px;
-			line-height: 1;
-		}
-
-		.back:hover {
-			border-color: var(--accent);
-			color: var(--accent);
-		}
-
-		h1 {
-			margin: 0 0 7px;
-			font-size: 25px;
-			letter-spacing: -0.5px;
-		}
-
-		.intro {
-			margin: 0;
-			color: var(--muted);
-			font-size: 12px;
-		}
-
-		.period {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			padding: 9px 11px;
-			border: 1px solid var(--border);
-			border-radius: 7px;
-			background: var(--card);
-			color: var(--text);
-			font-size: 14px;
-		}
-
-		.period select {
-			border: 0;
-			outline: 0;
-			background: transparent;
-			color: inherit;
-			font-size: 14px;
-		}
-
-		.tabs {
-			display: flex;
-			gap: 25px;
-			border-bottom: 1px solid var(--border);
-			margin-bottom: 14px;
-			overflow-x: auto;
-		}
-
-		.tab {
-			padding: 0 2px 12px;
-			border: 0;
-			border-bottom: 2px solid transparent;
-			background: transparent;
-			color: var(--muted);
-			font-size: 14px;
-			white-space: nowrap;
-		}
-
-		.tab.active,
-		.tab:hover {
-			border-color: var(--accent);
-			color: var(--text);
-		}
-
-		.toolbar {
-			display: flex;
-			gap: 10px;
-		}
-
-		.search {
-			display: flex;
-			align-items: center;
-			gap: 9px;
-			flex: 1;
-			height: 38px;
-			padding: 0 12px;
-			border: 1px solid var(--border);
-			border-radius: 7px;
-			background: var(--field);
-			color: var(--muted);
-		}
-
-		.search input {
-			width: 100%;
-			border: 0;
-			outline: 0;
-			background: transparent;
-			color: var(--text);
-			font-size: 14px;
-		}
-
-		.search input::placeholder {
-			color: var(--muted);
-		}
-
-		.filter,
-		.action {
-			height: 38px;
-			padding: 0 14px;
-			border: 1px solid var(--border);
-			border-radius: 7px;
-			background: var(--card);
-			color: var(--text);
-			font-size: 14px;
-		}
-
-		.filter:hover,
-		.action:hover {
-			border-color: var(--accent);
-		}
-
-		.table-panel {
-			overflow: hidden;
-			border: 1px solid var(--border);
-			border-radius: 9px;
-			background: linear-gradient(145deg, var(--card-soft), var(--card));
-		}
-
-		table {
-			width: 100%;
-			border-collapse: collapse;
-			font-size: 14px;
-		}
-
-		th,
-		td {
-			padding: 14px 12px;
-			border-bottom: 1px solid #2a2a2d;
-			text-align: left;
-			vertical-align: middle;
-		}
-
-		th {
-			color: var(--muted);
-			font-size: 12.5px;
-			font-weight: 500;
-		}
-
-		tbody tr:hover {
-			background: rgba(245, 130, 31, 0.04);
-		}
-
-		tbody tr:last-child td {
-			border-bottom: 0;
-		}
-
-		.parcel {
-			font-weight: 700;
-		}
-
-		.pickup {
-			max-width: 105px;
-			line-height: 1.45;
-		}
-
-		.status {
-			display: inline-block;
-			padding: 4px 6px;
-			border-radius: 4px;
-			font-size: 12px;
-			font-weight: 600;
-			white-space: nowrap;
-		}
-
-		.collected {
-			background: rgba(54, 201, 120, 0.13);
-			color: var(--green);
-		}
-
-		.processing,
-		.transit {
-			background: rgba(77, 145, 255, 0.14);
-			color: var(--blue);
-		}
-
-		.at-rank {
-			background: rgba(245, 130, 31, 0.14);
-			color: var(--accent);
-		}
-
-		.delivered {
-			background: rgba(155, 114, 223, 0.14);
-			color: var(--purple);
-		}
-
-		.empty {
-			padding: 32px;
-			color: var(--muted);
-			text-align: center;
-		}
-
-		.footer-row {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 12px;
-			padding: 14px 12px;
-			color: var(--muted);
-			font-size: 12px;
-		}
-
-		.pagination {
-			display: flex;
-			align-items: center;
-			gap: 14px;
-		}
-
-		.page-button {
-			width: 24px;
-			height: 24px;
-			border: 1px solid transparent;
-			border-radius: 5px;
-			background: transparent;
-			color: var(--text);
-			font-size: 12px;
-		}
-
-		.page-button.active,
-		.page-button:hover {
-			border-color: var(--accent);
-			color: var(--accent);
-		}
-
-		.actions {
-			display: flex;
-			gap: 12px;
-			margin-top: 20px;
-		}
-
-		.action.primary {
-			border-color: var(--accent);
-			background: var(--accent);
-			color: #111;
-			font-weight: 700;
-		}
-
-		.action.primary:hover {
-			opacity: 0.85;
-		}
-
-		@media (max-width: 700px) {
-			.main {
-				padding: 24px 16px 40px;
-			}
-
-			.topbar {
-				align-items: stretch;
-				flex-direction: column;
-			}
-
-			.period {
-				align-self: flex-start;
-			}
-
-			.toolbar {
-				flex-direction: column;
-			}
-
-			.filter {
-				align-self: flex-start;
-			}
-
-			.table-panel {
-				overflow-x: auto;
-			}
-
-			table {
-				min-width: 700px;
-			}
-
-			.actions {
-				flex-wrap: wrap;
-			}
-		}
-
-		.theme-toggle {
-			width: 36px;
-			height: 36px;
-			border: 1px solid var(--border);
-			border-radius: 50%;
-			background: var(--card);
-			color: var(--text);
-			cursor: pointer;
-		}
-
-		.theme-toggle .icon-moon { display: none; }
-
-		[data-theme="light"] {
-			--page: #ffffff;
-			--card: #ffffff;
-			--card-soft: #fafafa;
-			--field: #f2f2f2;
-			--border: #d0d0d0;
-			--text: #000000;
-			--muted: #333333;
-			--faint: #666666;
-		}
-
-		[data-theme="light"] th,
-		[data-theme="light"] td { border-bottom-color: #e0e0e0; }
-		[data-theme="light"] .theme-toggle .icon-sun { display: none; }
-		[data-theme="light"] .theme-toggle .icon-moon { display: inline; }
-
-		.site-header {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			padding: 18px 40px;
-			border-bottom: 1px solid var(--border);
-			gap: 24px;
-			position: sticky;
-			top: 0;
-			background: var(--page);
-			z-index: 50;
-			margin-bottom: 40px;
-		}
-
-		.site-header .logo,
-		.site-header .header-right {
-			display: flex;
-			align-items: center;
-		}
-
-		.site-header .logo {
-			gap: 10px;
-			font-weight: 700;
-			font-size: 19px;
-			letter-spacing: -0.01em;
-			flex-shrink: 0;
-		}
-
-		.site-header .logo-mark {
-			width: 32px;
-			height: 32px;
-			border-radius: 8px;
-			background: var(--accent-soft, rgba(240,129,31,0.14));
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			color: var(--accent);
-			flex-shrink: 0;
-		}
-
-		.site-header .logo-tag {
-			color: var(--accent);
-			font-weight: 700;
-			font-size: 14px;
-			margin-left: 2px;
-		}
-
-		.site-header nav {
-			display: flex;
-			align-items: center;
-			gap: 32px;
-			font-size: 14.5px;
-			font-weight: 500;
-		}
-
-		.site-header nav a {
-			color: var(--muted);
-			position: relative;
-			padding-bottom: 4px;
-			text-decoration: none;
-			transition: color .15s ease;
-		}
-
-		.site-header nav a:hover { color: var(--text); }
-		.site-header nav a.active { color: var(--accent); }
-
-		.site-header nav a.active::after {
-			content: "";
-			position: absolute;
-			left: 0;
-			right: 0;
-			bottom: -28px;
-			height: 2px;
-			background: var(--accent);
-		}
-
-		.site-header .header-right { gap: 14px; }
-		.site-header .vendor-name { font-size: 14.5px; font-weight: 600; }
-
-		.site-header .icon-btn {
-			background: var(--card);
-			border: 1px solid var(--border);
-			color: var(--text);
-			cursor: pointer;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			width: 36px;
-			height: 36px;
-			padding: 0;
-			border-radius: 50%;
-			flex-shrink: 0;
-			transition: background .15s ease, border-color .15s ease, transform .15s ease;
-		}
-
-		.site-header .icon-btn:hover { background: var(--card-soft); border-color: #3A3A41; }
-		.site-header .icon-btn:active { transform: scale(0.94); }
-
-		.site-header .avatar {
-			width: 36px;
-			height: 36px;
-			border-radius: 50%;
-			background: var(--accent);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-size: 14px;
-			font-weight: 700;
-			color: var(--page);
-			flex-shrink: 0;
-		}
-
-		.site-header .icon-moon { display: none; }
-		[data-theme="light"] .site-header .icon-sun { display: none; }
-		[data-theme="light"] .site-header .icon-moon { display: inline; }
-	</style>
-</head>
-<body>
-	<header class="site-header">
-		<div class="logo">
-			<span class="logo-mark">
-				<img src="https://i.ibb.co/LWW04LT/logo.png" alt="LocalCart" width="20" height="20">
-			</span>
-			LocalCart <span class="logo-tag">for Vendors</span>
-		</div>
-
-		<nav>
-			<a href="vendor-dashboard.html">Dashboard</a>
-			<a href="add-product.html">Products</a>
-			<a href="vendor-dashboard.html" class="active">Orders</a>
-			<a href="subscription.html">Subscribe</a>
-		</nav>
-
-		<div class="header-right">
-			<button class="icon-btn" id="navbar-theme-toggle" type="button" aria-label="Toggle theme">
-				<svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<circle cx="12" cy="12" r="4"></circle>
-					<path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
-				</svg>
-				<svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M21 12.79A9 9 1 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-				</svg>
-			</button>
-			<span class="vendor-name"></span>
-			<div class="avatar"></div>
-		</div>
-	</header>
-	<main class="main">
-		<header class="topbar">
-			<div class="heading-group">
-				<button class="back" type="button" aria-label="Back to Vendors Dashboard">←</button>
-				<div><h1>Order Tracker</h1><p class="intro">Manage and track all your orders.</p></div>
-			</div>
-			<label class="period">This Month <select id="period"><option>This Month</option><option>Last Month</option><option>This Year</option></select></label>
-		</header>
-
-		<nav class="tabs" aria-label="Shipment statuses">
-			<button class="tab active" data-status="All">All</button><button class="tab" data-status="Processing">Processing</button><button class="tab" data-status="In Transit">In Transit</button><button class="tab" data-status="At Rank">At Rank</button><button class="tab" data-status="Collected">Collected</button><button class="tab" data-status="Delivered">Returned</button>
-		</nav>
-
-		<section class="toolbar" aria-label="Shipment filters">
-			<label class="search">⌕ <input id="search" type="search" placeholder="Search shipments..." aria-label="Search shipments"></label>
-			<button class="filter" id="filterButton" type="button">☷ &nbsp; Filter</button>
-		</section>
-
-		<section class="table-panel">
-			<table>
-				<thead><tr><th>Order</th><th>Customer</th><th>Items</th><th>Status</th><th>Amount</th><th>Date</th></tr></thead>
-				<tbody id="shipmentRows"></tbody>
-			</table>
-			<div class="footer-row"><span id="resultCount"></span><div class="pagination" id="pagination"></div></div>
-		</section>
-
-		<div class="actions"><button class="action primary" id="create" type="button">Unshipped Orders</button></div>
-	</main>
-	<script src="api.js"></script>
-	<script src="app.js"></script>
-	<script src="deliverytracker.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LocalCart - RankDrop Shipments</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --page: #0f0f10;
+        --card: #1b1b1d;
+        --card-soft: #202023;
+        --field: #2a2a2d;
+        --border: #303034;
+        --text: #f5f5f5;
+        --muted: #9a9a9d;
+        --faint: #6f6f72;
+        --accent: #f5821f;
+        --green: #36c978;
+        --blue: #4d91ff;
+        --purple: #9b72df;
+      }
+
+      .profile-dropdown-wrap {
+        position: relative;
+      }
+
+      .profile-toggle {
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        border-radius: 50%;
+        position: relative;
+        line-height: 0;
+      }
+
+      .profile-toggle:hover .avatar {
+        border-color: var(--accent);
+      }
+
+      .vendor-shell .profile-dropdown {
+        display: none !important;
+        position: absolute;
+        top: calc(100% + 12px);
+        right: 0;
+        width: 240px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        z-index: 80;
+      }
+
+      .vendor-shell .profile-dropdown.open {
+        display: block !important;
+      }
+
+      .profile-dropdown-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .profile-dropdown-header .avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+      }
+
+      .profile-dropdown-header > div:last-child {
+        min-width: 0;
+      }
+
+      .profile-dropdown-header strong,
+      .profile-dropdown-header span {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .profile-dropdown-header strong {
+        font-size: 14px;
+      }
+
+      .profile-dropdown-header span {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .profile-dropdown-links {
+        padding: 6px;
+      }
+
+      .profile-dropdown-links a,
+      .profile-dropdown-links button {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 9px;
+        background: none;
+        color: var(--text);
+        cursor: pointer;
+        font: inherit;
+        font-size: 13.5px;
+        text-align: left;
+        text-decoration: none;
+      }
+
+      .profile-dropdown-links a:hover,
+      .profile-dropdown-links button:hover {
+        background: var(--card-soft);
+      }
+
+      .profile-dropdown-links .divider {
+        height: 1px;
+        margin: 6px 4px;
+        background: var(--border);
+      }
+
+      .profile-dropdown-links .logout-link {
+        color: #d9534f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--page);
+        color: var(--text);
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .main {
+        width: min(100%, 1120px);
+        margin: 0 auto;
+        padding: 30px 34px 50px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        margin-bottom: 50px;
+      }
+
+      .heading-group {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .back {
+        width: 48px;
+        height: 48px;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        background: var(--field);
+        color: var(--text);
+        font-size: 27px;
+        line-height: 1;
+      }
+
+      .back:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      h1 {
+        margin: 0 0 7px;
+        font-size: 25px;
+        letter-spacing: -0.5px;
+      }
+
+      .intro {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .period {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 11px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background: var(--card);
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      .period select {
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: inherit;
+        font-size: 14px;
+      }
+
+      .tabs {
+        display: flex;
+        gap: 25px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 14px;
+        overflow-x: auto;
+      }
+
+      .tab {
+        padding: 0 2px 12px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: transparent;
+        color: var(--muted);
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      .tab.active,
+      .tab:hover {
+        border-color: var(--accent);
+        color: var(--text);
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 10px;
+      }
+
+      .search {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        flex: 1;
+        height: 38px;
+        padding: 0 12px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background: var(--field);
+        color: var(--muted);
+      }
+
+      .search input {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        background: transparent;
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      .search input::placeholder {
+        color: var(--muted);
+      }
+
+      .filter,
+      .action {
+        height: 38px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        background: var(--card);
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      .filter:hover,
+      .action:hover {
+        border-color: var(--accent);
+      }
+
+      .table-panel {
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: linear-gradient(145deg, var(--card-soft), var(--card));
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th,
+      td {
+        padding: 14px 12px;
+        border-bottom: 1px solid #2a2a2d;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        color: var(--muted);
+        font-size: 12.5px;
+        font-weight: 500;
+      }
+
+      tbody tr:hover {
+        background: rgba(245, 130, 31, 0.04);
+      }
+
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .parcel {
+        font-weight: 700;
+      }
+
+      .pickup {
+        max-width: 105px;
+        line-height: 1.45;
+      }
+
+      .status {
+        display: inline-block;
+        padding: 4px 6px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .collected {
+        background: rgba(54, 201, 120, 0.13);
+        color: var(--green);
+      }
+
+      .processing,
+      .transit {
+        background: rgba(77, 145, 255, 0.14);
+        color: var(--blue);
+      }
+
+      .at-rank {
+        background: rgba(245, 130, 31, 0.14);
+        color: var(--accent);
+      }
+
+      .delivered {
+        background: rgba(155, 114, 223, 0.14);
+        color: var(--purple);
+      }
+
+      .empty {
+        padding: 32px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 12px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .pagination {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .page-button {
+        width: 24px;
+        height: 24px;
+        border: 1px solid transparent;
+        border-radius: 5px;
+        background: transparent;
+        color: var(--text);
+        font-size: 12px;
+      }
+
+      .page-button.active,
+      .page-button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .action.primary {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: #111;
+        font-weight: 700;
+      }
+
+      .action.primary:hover {
+        opacity: 0.85;
+      }
+
+      @media (max-width: 700px) {
+        .main {
+          padding: 24px 16px 40px;
+        }
+
+        .topbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .period {
+          align-self: flex-start;
+        }
+
+        .toolbar {
+          flex-direction: column;
+        }
+
+        .filter {
+          align-self: flex-start;
+        }
+
+        .table-panel {
+          overflow-x: auto;
+        }
+
+        table {
+          min-width: 700px;
+        }
+
+        .actions {
+          flex-wrap: wrap;
+        }
+      }
+
+      .theme-toggle {
+        width: 36px;
+        height: 36px;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        background: var(--card);
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      .theme-toggle .icon-moon {
+        display: none;
+      }
+
+      [data-theme="light"] {
+        --page: #ffffff;
+        --card: #ffffff;
+        --card-soft: #fafafa;
+        --field: #f2f2f2;
+        --border: #d0d0d0;
+        --text: #000000;
+        --muted: #333333;
+        --faint: #666666;
+      }
+
+      [data-theme="light"] th,
+      [data-theme="light"] td {
+        border-bottom-color: #e0e0e0;
+      }
+      [data-theme="light"] .theme-toggle .icon-sun {
+        display: none;
+      }
+      [data-theme="light"] .theme-toggle .icon-moon {
+        display: inline;
+      }
+
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 40px;
+        border-bottom: 1px solid var(--border);
+        gap: 24px;
+        position: sticky;
+        top: 0;
+        background: var(--page);
+        z-index: 50;
+        margin-bottom: 40px;
+      }
+
+      .site-header .logo,
+      .site-header .header-right {
+        display: flex;
+        align-items: center;
+      }
+
+      .site-header .logo {
+        gap: 10px;
+        font-weight: 700;
+        font-size: 19px;
+        letter-spacing: -0.01em;
+        flex-shrink: 0;
+      }
+
+      .site-header .logo-mark {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--accent-soft, rgba(240, 129, 31, 0.14));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent);
+        flex-shrink: 0;
+      }
+
+      .site-header .logo-tag {
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 14px;
+        margin-left: 2px;
+      }
+
+      .site-header nav {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+        font-size: 14.5px;
+        font-weight: 500;
+      }
+
+      .site-header nav a {
+        color: var(--muted);
+        position: relative;
+        padding-bottom: 4px;
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+
+      .site-header nav a:hover {
+        color: var(--text);
+      }
+      .site-header nav a.active {
+        color: var(--accent);
+      }
+
+      .site-header nav a.active::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -28px;
+        height: 2px;
+        background: var(--accent);
+      }
+
+      .site-header .header-right {
+        gap: 14px;
+      }
+      .site-header .vendor-name {
+        font-size: 14.5px;
+        font-weight: 600;
+      }
+
+      .site-header .icon-btn {
+        background: var(--card);
+        border: 1px solid var(--border);
+        color: var(--text);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border-radius: 50%;
+        flex-shrink: 0;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease,
+          transform 0.15s ease;
+      }
+
+      .site-header .icon-btn:hover {
+        background: var(--card-soft);
+        border-color: #3a3a41;
+      }
+      .site-header .icon-btn:active {
+        transform: scale(0.94);
+      }
+
+      .site-header .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #2f80ed;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--page);
+        flex-shrink: 0;
+      }
+
+      .site-header .icon-moon {
+        display: none;
+      }
+      [data-theme="light"] .site-header .icon-sun {
+        display: none;
+      }
+      [data-theme="light"] .site-header .icon-moon {
+        display: inline;
+      }
+    </style>
+    <link rel="stylesheet" href="mobile.css" />
+  </head>
+  <body class="vendor-shell">
+    <header class="site-header">
+      <div class="logo">
+        <span class="logo-mark">
+          <img
+            src="https://i.ibb.co/LWW04LT/logo.png"
+            alt="LocalCart"
+            width="20"
+            height="20"
+          />
+        </span>
+        LocalCart <span class="logo-tag">for Vendors</span>
+      </div>
+
+      <nav>
+        <a href="vendor-dashboard.html">Dashboard</a>
+        <a href="add-product.html">Products</a>
+        <a href="deliverytracker.html" class="active">Orders</a>
+        <a href="subscription.html">Subscribe</a>
+      </nav>
+
+      <div class="header-right">
+        <button
+          class="icon-btn"
+          id="navbar-theme-toggle"
+          type="button"
+          aria-label="Toggle theme"
+        >
+          <svg
+            class="icon-sun"
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="4"></circle>
+            <path
+              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+            ></path>
+          </svg>
+          <svg
+            class="icon-moon"
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 12.79A9 9 1 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+          </svg>
+        </button>
+        <span class="vendor-name"></span>
+        <div class="profile-dropdown-wrap">
+          <button
+            class="profile-toggle"
+            id="profile-toggle"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-label="Open vendor profile menu"
+          >
+            <div class="avatar"></div>
+          </button>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <div class="profile-dropdown-header">
+              <div class="avatar"></div>
+              <div>
+                <strong data-profile-name>Vendor account</strong
+                ><span data-profile-email></span>
+              </div>
+            </div>
+            <div class="profile-dropdown-links">
+              <a href="vendor-dashboard.html#vendor-profile-title"
+                >My store profile</a
+              ><a href="add-product.html">My products</a>
+              <div class="divider"></div>
+              <button type="button" class="logout-link">Log out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="main">
+      <header class="topbar">
+        <div class="heading-group">
+          <button
+            class="back"
+            type="button"
+            aria-label="Back to Vendors Dashboard"
+          >
+            ←
+          </button>
+          <div>
+            <h1>Order Tracker</h1>
+            <p class="intro">Manage and track all your orders.</p>
+          </div>
+        </div>
+        <label class="period"
+          >This Month
+          <select id="period">
+            <option>This Month</option>
+            <option>Last Month</option>
+            <option>This Year</option>
+          </select></label
+        >
+      </header>
+
+      <nav class="tabs" aria-label="Shipment statuses">
+        <button class="tab active" data-status="All">All</button
+        ><button class="tab" data-status="Processing">Processing</button
+        ><button class="tab" data-status="In Transit">In Transit</button
+        ><button class="tab" data-status="At Rank">At Rank</button
+        ><button class="tab" data-status="Collected">Collected</button
+        ><button class="tab" data-status="Delivered">Returned</button>
+      </nav>
+
+      <section class="toolbar" aria-label="Shipment filters">
+        <label class="search"
+          >⌕
+          <input
+            id="search"
+            type="search"
+            placeholder="Search shipments..."
+            aria-label="Search shipments"
+        /></label>
+        <button class="filter" id="filterButton" type="button">
+          ☷ &nbsp; Filter
+        </button>
+      </section>
+
+      <section class="table-panel">
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Status</th>
+              <th>Amount</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="shipmentRows"></tbody>
+        </table>
+        <div class="footer-row">
+          <span id="resultCount"></span>
+          <div class="pagination" id="pagination"></div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <button class="action primary" id="create" type="button">
+          Unshipped Orders
+        </button>
+      </div>
+    </main>
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+    <script src="deliverytracker.js"></script>
+  </body>
 </html>

@@ -10,6 +10,7 @@
     />
     <title>Checkout - LocalCart</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="mobile.css" />
   </head>
   <body>
     <!-- Header -->
@@ -196,23 +197,48 @@
               <h3>Vendor payment details</h3>
               <div class="form-group">
                 <label for="vendorFullName">Full name</label>
-                <input type="text" id="vendorFullName" placeholder="Your full name" autocomplete="name">
+                <input
+                  type="text"
+                  id="vendorFullName"
+                  placeholder="Your full name"
+                  autocomplete="name"
+                />
               </div>
               <div class="form-group">
                 <label for="vendorBusinessName">Business name</label>
-                <input type="text" id="vendorBusinessName" placeholder="Your business name" autocomplete="organization">
+                <input
+                  type="text"
+                  id="vendorBusinessName"
+                  placeholder="Your business name"
+                  autocomplete="organization"
+                />
               </div>
               <div class="form-group">
                 <label for="vendorEmail">Email address</label>
-                <input type="email" id="vendorEmail" placeholder="you@example.com" autocomplete="email">
+                <input
+                  type="email"
+                  id="vendorEmail"
+                  placeholder="you@example.com"
+                  autocomplete="email"
+                />
               </div>
               <div class="form-group">
                 <label for="vendorPhone">Phone number</label>
-                <input type="tel" id="vendorPhone" placeholder="Your phone number" autocomplete="tel">
+                <input
+                  type="tel"
+                  id="vendorPhone"
+                  placeholder="Your phone number"
+                  autocomplete="tel"
+                />
               </div>
               <div class="form-group">
                 <label for="vendorBillingAddress">Billing address</label>
-                <input type="text" id="vendorBillingAddress" placeholder="Street, city, province" autocomplete="street-address">
+                <input
+                  type="text"
+                  id="vendorBillingAddress"
+                  placeholder="Street, city, province"
+                  autocomplete="street-address"
+                />
               </div>
             </div>
           </form>
@@ -356,14 +382,18 @@
           <div class="order-summary">
             <h3>Order summary</h3>
             <div class="subscription-summary" id="subscriptionSummary" hidden>
-              <div class="summary-row"><span>Plan</span><strong id="selectedPlanName"></strong></div>
-              <div class="summary-row"><span>Subscription</span><span id="selectedPlanPrice"></span></div>
+              <div class="summary-row">
+                <span>Plan</span><strong id="selectedPlanName"></strong>
+              </div>
+              <div class="summary-row">
+                <span>Subscription</span><span id="selectedPlanPrice"></span>
+              </div>
             </div>
             <div class="summary-row" id="cartItemsSummary"></div>
             <div class="summary-row" id="deliverySummary"></div>
             <div class="summary-row total">
               <span>Total</span>
-              <span class="total-amount">R615.00</span>
+              <span class="total-amount">R0.00</span>
             </div>
             <button type="button" id="placeOrderBtn" class="btn-place-order">
               Pay with PayFast

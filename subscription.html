@@ -197,7 +197,7 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6a5cff, #b23fd8);
+    background: #2f80ed;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -655,8 +655,9 @@
     outline-offset: 2px;
   }
 </style>
+<link rel="stylesheet" href="mobile.css">
 </head>
-<body>
+<body class="vendor-shell">
   <header>
     <div class="logo">
       <span class="logo-mark">
@@ -667,7 +668,7 @@
 
     <nav>
       <a href="vendor-dashboard.html">Dashboard</a>
-      <a href="vendor-dashboard.html">Products</a>
+      <a href="add-product.html">Products</a>
       <a href="deliverytracker.html">Orders</a>
       <a href="subscription.html" class="active">Subscribe</a>
     </nav>
@@ -683,8 +684,16 @@
         </svg>
       </button>
 
-      <span class="vendor-name">Maya's Kitchen</span>
-      <div class="avatar">M</div>
+      <span class="vendor-name"></span>
+      <div class="profile-dropdown-wrap">
+        <button class="profile-toggle" id="profile-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open vendor profile menu">
+          <div class="avatar"></div>
+        </button>
+        <div class="profile-dropdown" id="profile-dropdown">
+          <div class="profile-dropdown-header"><div class="avatar"></div><div><strong data-profile-name>Vendor account</strong><span data-profile-email></span></div></div>
+          <div class="profile-dropdown-links"><a href="vendor-dashboard.html#vendor-profile-title">My store profile</a><a href="add-product.html">My products</a><div class="divider"></div><button type="button" class="logout-link">Log out</button></div>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -699,7 +708,7 @@
   <div class="page-subtitle">From your first sale to scaling across Cape Town — pick the plan that matches where your business is right now.</div>
 </div>
 
-<div class="plans-grid">
+<div class="plans-grid" id="plans-grid">
 
   <!-- STARTER -->
   <div class="plan-card">

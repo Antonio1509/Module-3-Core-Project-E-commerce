@@ -1,93 +1,246 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="light">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LocalCart for Vendors — Dashboard</title>
-<link rel="stylesheet" href="style.css" />
-</head>
-<body>
-
-<header>
-    <div class="logo">
-      <span class="logo-mark">
-        <img src="https://i.ibb.co/LWW04LT/logo.png" alt="LocalCart" width="20" height="20" />
-      </span>
-      LocalCart <span class="logo-tag">for Vendors</span>
-    </div>
-
-    <nav>
-      <a href="vendor-dashboard.html" class="active">Dashboard</a>
-      <a href="add-product.html">Products</a>
-      <a href="deliverytracker.html">Orders</a>
-      <a href="subscription.html">Subscribe</a>
-    </nav>
-
-    <div class="header-right">
-      <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
-        <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="4"></circle>
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
-        </svg>
-        <svg class="icon-moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
-        </svg>
-      </button>
-
-      <span class="vendor-name"></span>
-      <div class="avatar"></div>
-    </div>
-  </header>
-
-  <main class="vendor-main">
-    <div class="vendor-page-head">
-      <div>
-        <h1 id="vendor-welcome">Welcome back</h1>
-        <p>Here's how your shop is doing</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LocalCart for Vendors — Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="mobile.css" />
+  </head>
+  <body>
+    <header class="vendor-header">
+      <div class="logo">
+        <span class="logo-mark">
+          <img
+            src="https://i.ibb.co/LWW04LT/logo.png"
+            alt="LocalCart"
+            width="20"
+            height="20"
+          />
+        </span>
+        LocalCart <span class="logo-tag">for Vendors</span>
       </div>
-      <button class="btn-primary" id="add-product-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        Add product
-      </button>
-    </div>
 
-    <div class="vendor-stats" id="vendor-stats"></div>
+      <nav>
+        <a href="vendor-dashboard.html" class="active">Dashboard</a>
+        <a href="add-product.html">Products</a>
+        <a href="deliverytracker.html">Orders</a>
+        <a href="subscription.html">Subscribe</a>
+      </nav>
 
-    <h2 class="section-title">Recent orders</h2>
-    <div class="orders-card">
-      <table>
-        <thead>
-          <tr>
-            <th>Order</th>
-            <th>Item</th>
-            <th>Status</th>
-            <th class="num">Amount</th>
-          </tr>
-        </thead>
-        <tbody id="vendor-orders"></tbody>
-      </table>
-    </div>
+      <div class="header-right">
+        <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme">
+          <svg
+            class="icon-sun"
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="4"></circle>
+            <path
+              d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"
+            ></path>
+          </svg>
+          <svg
+            class="icon-moon"
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path>
+          </svg>
+        </button>
 
-    <!-- Action Buttons Row -->
-    <div style="display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap;">
-      <button class="btn-primary" id="overview-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-          <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-          <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-          <rect x="14" y="14" width="7" height="7" rx="1"></rect>
-        </svg>
-        Overview
-      </button>
-    </div>
-  </main>
+        <span class="vendor-name"></span>
+        <div class="profile-dropdown-wrap">
+          <button
+            class="profile-toggle"
+            id="profile-toggle"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-label="Open vendor profile menu"
+          >
+            <div class="avatar"></div>
+          </button>
+          <div class="profile-dropdown" id="profile-dropdown">
+            <div class="profile-dropdown-header">
+              <div class="avatar"></div>
+              <div>
+                <strong data-profile-name>Vendor account</strong>
+                <span data-profile-email></span>
+              </div>
+            </div>
+            <div class="profile-dropdown-links">
+              <a href="#vendor-profile-title">My store profile</a>
+              <a href="add-product.html">My products</a>
+              <div class="divider"></div>
+              <button type="button" class="logout-link">Log out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
 
-  <script src="api.js"></script>
-  <script src="app.js"></script>
-  <script src="vendor-dashboard.js"></script>
+    <main class="vendor-main">
+      <div class="vendor-page-head">
+        <div>
+          <h1 id="vendor-welcome">Welcome back</h1>
+          <p>Here's how your shop is doing</p>
+        </div>
+        <button class="btn-primary" id="add-product-btn">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add product
+        </button>
+      </div>
 
-</body>
+      <div class="vendor-stats" id="vendor-stats"></div>
+
+      <section
+        class="vendor-profile-panel"
+        aria-labelledby="vendor-profile-title"
+      >
+        <div class="vendor-profile-heading">
+          <div>
+            <h2 id="vendor-profile-title">Store profile</h2>
+            <p>
+              Keep your storefront details current and see who follows your
+              shop.
+            </p>
+          </div>
+          <button
+            class="btn-secondary"
+            id="edit-vendor-profile-btn"
+            type="button"
+          >
+            Edit profile
+          </button>
+        </div>
+
+        <div class="vendor-profile-layout">
+          <form class="vendor-profile-form" id="vendor-profile-form">
+            <div class="vendor-profile-fields">
+              <label
+                >Store name<input id="vendor-profile-name" name="name" required
+              /></label>
+              <label
+                >Category<input
+                  id="vendor-profile-category"
+                  name="category"
+                  required
+              /></label>
+              <label
+                >Location<input id="vendor-profile-location" name="location"
+              /></label>
+              <label
+                >Response time<input
+                  id="vendor-profile-response"
+                  name="response_time"
+              /></label>
+              <label
+                >Delivery area<input
+                  id="vendor-profile-delivery"
+                  name="delivery_area"
+              /></label>
+              <label
+                >Shipping information<input
+                  id="vendor-profile-shipping"
+                  name="shipping_info"
+              /></label>
+              <label class="vendor-profile-wide"
+                >About your store<textarea
+                  id="vendor-profile-about"
+                  name="about"
+                  rows="4"
+                ></textarea>
+              </label>
+            </div>
+            <div class="vendor-profile-actions" hidden>
+              <button class="btn-primary" type="submit">Save profile</button>
+              <button
+                class="btn-secondary"
+                id="cancel-vendor-profile-btn"
+                type="button"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+
+          <aside class="vendor-followers-panel">
+            <div class="vendor-followers-heading">
+              <h3>Followers</h3>
+              <strong id="vendor-follower-count">0</strong>
+            </div>
+            <div class="vendor-followers-list" id="vendor-followers-list">
+              <p class="vendor-profile-empty">Loading followers...</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <h2 class="section-title">Recent orders</h2>
+      <div class="orders-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Item</th>
+              <th>Status</th>
+              <th class="num">Amount</th>
+            </tr>
+          </thead>
+          <tbody id="vendor-orders"></tbody>
+        </table>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div style="display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap">
+        <button class="btn-primary" id="overview-btn">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.4"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="3" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1"></rect>
+          </svg>
+          Overview
+        </button>
+      </div>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="app.js"></script>
+    <script src="vendor-dashboard.js"></script>
+  </body>
 </html>
