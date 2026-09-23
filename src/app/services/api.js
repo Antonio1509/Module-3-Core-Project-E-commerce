@@ -4,10 +4,23 @@ const API_BASE_URL = import.meta.env.DEV ? '/api' : `${API_ORIGIN}/api`;
 export const getAuthToken = () => localStorage.getItem('token') || localStorage.getItem('localcart-token') || '';
 export const getStoredUser = () => { try { return JSON.parse(localStorage.getItem('user') || localStorage.getItem('localcart-user') || 'null'); } catch { return null; } };
 export function assetUrl(value) {
-  const source = String(value || '').trim();
+  let source = String(value || '').trim().replace(/\\/g, '/');
   if (!source) return '';
   if (/^(data:|blob:|https?:\/\/)/i.test(source)) return source;
-  try { return new URL(source.replace(/^\.?\//, ''), `${API_ORIGIN}/`).href; } catch { return source; }
+
+  // Keep paths from local absolute filenames pointed at Express uploads.
+  const uploadsIndex = source.toLowerCase().lastIndexOf('/uploads/');
+  if (uploadsIndex >= 0) source = source.slice(uploadsIndex + 1);
+  source = source.replace(/^\.?\//, '').replace(/^api\/uploads\//i, 'uploads/');
+
+  try { return new URL(source, `${API_ORIGIN}/`).href; } catch { return source; }
+}
+
+export function productImageUrl(product = {}) {
+  const image = product.image_url || product.image || product.imageUrl ||
+    product.imageURL || product.image_path || product.photo_url ||
+    product.product_image || product.photo || product.thumbnail;
+  return assetUrl(typeof image === 'object' ? (image.url || image.path || image.src) : image);
 }
 export async function apiFetch(endpoint, options = {}) {
   const headers = { ...(options.headers || {}) };
