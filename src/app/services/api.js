@@ -12,15 +12,21 @@ export function assetUrl(value) {
   const uploadsIndex = source.toLowerCase().lastIndexOf('/uploads/');
   if (uploadsIndex >= 0) source = source.slice(uploadsIndex + 1);
   source = source.replace(/^\.?\//, '').replace(/^api\/uploads\//i, 'uploads/');
+  if (!source.includes('/')) source = 'uploads/products/' + source;
 
   try { return new URL(source, `${API_ORIGIN}/`).href; } catch { return source; }
 }
 
-export function productImageUrl(product = {}) {
-  const image = product.image_url || product.image || product.imageUrl ||
-    product.imageURL || product.image_path || product.photo_url ||
-    product.product_image || product.photo || product.thumbnail;
-  return assetUrl(typeof image === 'object' ? (image.url || image.path || image.src) : image);
+export function productImageUrls(product = {}) {
+  const fields = ['image_url', 'image', 'imageUrl', 'imageURL', 'image_path', 'photo_url', 'product_image', 'photo', 'thumbnail'];
+  const urls = fields.flatMap((field) => {
+    const image = product[field];
+    const values = typeof image === 'object' && image !== null
+      ? [image.url, image.path, image.src]
+      : [image];
+    return values.map(assetUrl).filter(Boolean);
+  });
+  return [...new Set(urls)];
 }
 export async function apiFetch(endpoint, options = {}) {
   const headers = { ...(options.headers || {}) };
