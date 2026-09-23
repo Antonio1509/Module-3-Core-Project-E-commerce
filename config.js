@@ -1,1 +1,0 @@
-window.LOCALCART_API_URL = 'https://module-3-core-project-e-commerce-backend-production.up.railway.app/api';

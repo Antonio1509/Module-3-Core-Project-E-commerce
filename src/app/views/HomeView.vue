@@ -1,0 +1,9 @@
+<script setup>
+import { onMounted, ref } from 'vue';
+import { apiFetch, listFrom } from '../services/api';
+import ProductCard from '../../product/components/ProductCard.vue';
+const products = ref([]); const search = ref(''); const category = ref(''); const loading = ref(true);
+async function load() { loading.value = true; const params = new URLSearchParams({ ...(search.value ? { search: search.value } : {}), ...(category.value ? { category: category.value } : {}) }); try { products.value = listFrom(await apiFetch(`/products?${params}`), ['products']); } catch { products.value = []; } finally { loading.value = false; } }
+onMounted(load);
+</script>
+<template><section class="hero"><h1>Welcome to LocalCart</h1><p>Discover new products from your favorite local South African artisans and small businesses.</p><button class="btn-primary" type="button" @click="document.getElementById('products-grid')?.scrollIntoView({ behavior: 'smooth' })">Browse products</button></section><section class="content"><h2 class="section-title">Categories</h2><div class="categories"><button v-for="item in ['Food', 'Fashion', 'Skincare', 'Crafts']" :key="item" class="category-card" :class="{ active: category === item }" type="button" @click="category = category === item ? '' : item; load()"><span class="label">{{ item }}</span></button></div></section><section id="products-grid" class="content"><div class="section-heading"><h2 class="section-title">Featured products</h2><input v-model="search" class="search-input" placeholder="Search products" @input="load" /></div><div v-if="loading" class="empty-state">Loading products...</div><div v-else-if="!products.length" class="empty-state">No products found.</div><div v-else class="products"><ProductCard v-for="product in products" :key="product.id || product.product_id" :product="product" /></div></section></template>
